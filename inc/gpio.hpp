@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <atomic>
 
 class GPIO {
     public:
@@ -76,8 +77,8 @@ class GPIO {
             BCM2837_TEST4,
             BCM2837_MAX
         };
-
-        using device_register = std::uint32_t volatile;
+   
+        using device_register = volatile std::atomic<std::uint32_t>; //@brief This ensures that this is a thread safe
         using gpio_number = std::uint32_t;
         using pin_number = std::uint32_t;
 

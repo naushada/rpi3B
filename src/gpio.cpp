@@ -8,7 +8,7 @@
 
 static const std::unordered_map<GPIO::gpio_number, GPIO::pin_number> gpioNo2PinNo = {
     /**
-     * @brief pin_number value 0 means this ping is either, GROUND, 3.3V, 5V or DNC - Don't Connect
+     * @brief pin_number value 0 means this pin is either, GROUND, 3.3V, 5V or DNC - Don't Connect
     */
     {0,   0}, {1,  28}, {2,   3}, {3,   5}, {4,   7}, {5,  29}, {6,  31}, {7,  26}, {8,  24}, {9,  21},
     {10, 19}, {11, 23}, {12, 32}, {13, 33}, {14,  8}, {15, 10}, {16, 36}, {17, 11}, {18, 12}, {19, 35},
@@ -19,7 +19,13 @@ static const std::unordered_map<GPIO::gpio_number, GPIO::pin_number> gpioNo2PinN
 };
 
 void GPIO::write32(gpio_number gpio_n, std::uint32_t value) {
-    m_register[gpio_n/10] = value;
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        m_register[pin_no/10] = value;
+    }
 }
 
 void GPIO::write(gpio_number gpio_n, GPIO::Config cfg) {
@@ -27,17 +33,33 @@ void GPIO::write(gpio_number gpio_n, GPIO::Config cfg) {
      * @brief
      *      First clear those bits and then set to value config.
     */
-    m_register[(gpio_n / 10)] &= (~(07U << ((gpio_n % 10) * 3U)));
-    m_register[(gpio_n / 10)] |= (cfg << ((gpio_n % 10) * 3U));
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        m_register[(pin_no / 10)] &= (~(07U << ((pin_no % 10) * 3U)));
+        m_register[(pin_no / 10)] |= (cfg << ((pin_no % 10) * 3U));
+    }
 }
 
 std::uint32_t GPIO::read32(gpio_number gpio_n) {
-    return(m_register[gpio_n/10]);
+
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+        return(m_register[pin_no/10]);
+    }
+    return(0);
 }
 
 std::uint32_t GPIO::read(gpio_number gpio_n) {
 
-    return((m_register[gpio_n/10]  >> ((gpio_n % 10U) * 3U)) & 0b111);
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+        return((m_register[pin_no/10]  >> ((pin_no % 10U) * 3U)) & 0b111);
+    }
+    return(0);
 }
 
 std::uint32_t GPIO::GPLEVn(gpio_number gpio_n) const {
@@ -70,22 +92,32 @@ void GPIO::GPLEVn(gpio_number gpio_n) {
 
 void GPIO::output(gpio_number gpio_n) {
 
-    /* @brief:
-    *  Each 32bits register can accomodate 10 gpios FSEL, hence division by 10.
-    *  gpios (0-9), (10-19), (20-29), (30-39), (40-49) and (50-53) will be 
-    *  programmed in register FSEL0, FSEL1, FSEL2, FSEL3, FSEL4 and FSEL5 respectively.
-    */
-    m_register[(gpio_n / 10)] |= (1U << ((gpio_n % 10) * 3U));
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+        /* @brief:
+         *  Each 32bits register can accomodate 10 gpios FSEL, hence division by 10.
+         *  gpios (0-9), (10-19), (20-29), (30-39), (40-49) and (50-53) will be 
+         *  programmed in register FSEL0, FSEL1, FSEL2, FSEL3, FSEL4 and FSEL5 respectively.
+         */
+        m_register[(pin_no / 10)] |= (1U << ((pin_no % 10) * 3U));
+    }
 }
 
 void GPIO::input(gpio_number gpio_n) {
 
-    /* @brief:
-    *  Each 32bits register can accomodate 10 gpios FSEL, hence division by 10.
-    *  gpios (0-9), (10-19), (20-29), (30-39), (40-49) and (50-53) will be 
-    *  programmed in register FSEL0, FSEL1, FSEL2, FSEL3, FSEL4 and FSEL5 respectively.
-    */		
-    m_register[(gpio_n / 10)] &= (~(7U << ((gpio_n % 10U) * 3U)));
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+        /* @brief:
+         *  Each 32bits register can accomodate 10 gpios FSEL, hence division by 10.
+         *  gpios (0-9), (10-19), (20-29), (30-39), (40-49) and (50-53) will be 
+         *  programmed in register FSEL0, FSEL1, FSEL2, FSEL3, FSEL4 and FSEL5 respectively.
+         */
+        m_register[(gpio_n / 10)] &= (~(7U << ((gpio_n % 10U) * 3U)));
+    }
 }
 
 void GPIO::GPCLRn(gpio_number gpio_n) {
@@ -131,7 +163,6 @@ std::uint32_t GPIO::GPGETn(gpio_number gpio_n) {
         /*set the bits 0 - 21 for GPIO greater than 31 */
         return((m_register[Register::BCM2837_GPSET1] >> (pin_no - 32)) & 01U);
     }
-
     return(0);
 }
 
@@ -379,7 +410,6 @@ std::uint32_t GPIO::GPPUDCLKn(gpio_number gpio_n) const {
         /*set the bits 0 - 21 for GPIO greater than 31 */
         return((m_register[Register::BCM2837_GPPUDCLK1] >> (pin_no - 32)) & 01U);
     }
-
     return(0);
 }
 
