@@ -354,11 +354,33 @@ std::uint32_t GPIO::GPPUD(gpio_number gpio_n) const {
 }
 
 void GPIO::GPPUDCLKn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
 
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPPUDCLK0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPPUDCLK1] |= (1U << (pin_no - 32));
+    }
 }
 
 std::uint32_t GPIO::GPPUDCLKn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
 
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPPUDCLK0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPPUDCLK1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
 }
 
 
