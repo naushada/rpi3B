@@ -174,7 +174,7 @@ TEST_F(GPIOTest, GPIO_Number_2to9_OutputMode) {
     gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, 01);    
+        EXPECT_EQ(res, GPIO::Config::OutputMode);    
     }
 }
 
@@ -188,7 +188,7 @@ TEST_F(GPIOTest, GPIO_Number_10to19_OutputMode) {
     gpio_n = 10;
     for(; gpio_n < 20; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, 01);
+        EXPECT_EQ(res, GPIO::Config::OutputMode);
     }
 }
 
@@ -202,7 +202,7 @@ TEST_F(GPIOTest, GPIO_Number_20to27_OutputMode) {
     gpio_n = 20;
     for(; gpio_n < 28; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, 01);
+        EXPECT_EQ(res, GPIO::Config::OutputMode);
     }
 }
 
@@ -250,18 +250,18 @@ TEST_F(GPIOTest, GPIO_Number_50to53_OutputMode) {
 }
 #endif
 
-TEST_F(GPIOTest, GPIO_Number_0to9_AlternateFunction0) {
+TEST_F(GPIOTest, GPIO_Number_2to9_AlternateFunction0) {
 
-    GPIO::gpio_number gpio_n = 0;
+    GPIO::gpio_number gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::AlternateFunction0);
     }
 
-    gpio_n = 0;
-    auto res = gpio().read32(gpio_n);
-    //std::cout << "GPIO 0 to 9: 0x" << std::hex << res << std::dec << std::endl;
-
-    EXPECT_EQ(res, 0x24924924);
+    gpio_n = 2;
+    for(; gpio_n < 10; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::AlternateFunction0);
+    }
 }
 
 TEST_F(GPIOTest, GPIO_Number_10to19_AlternateFunction2) {
@@ -272,74 +272,84 @@ TEST_F(GPIOTest, GPIO_Number_10to19_AlternateFunction2) {
     }
 
     gpio_n = 10;
-    auto res = gpio().read32(gpio_n);
-    //std::cout << "GPIO 10 to 19: 0x" << std::hex << res << std::dec << std::endl;
-
-    EXPECT_EQ(res, 0x36db6db6);
+    for(; gpio_n < 20; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::AlternateFunction2);
+    }
 }
 
-TEST_F(GPIOTest, GPIO_Number_20to29_AlternateFunction5) {
+TEST_F(GPIOTest, GPIO_Number_20to27_AlternateFunction5) {
 
     GPIO::gpio_number gpio_n = 20;
-    for(; gpio_n < 30; ++gpio_n) {
+    for(; gpio_n < 28; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::AlternateFunction5);
     }
 
     gpio_n = 20;
-    auto res = gpio().read32(gpio_n);
-    //std::cout << "GPIO 20 to 29: 0x" << std::hex << res << std::dec << std::endl;
-
-    EXPECT_EQ(res, 0x12492492);
+    for(; gpio_n < 28; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::AlternateFunction5);
+    }
 }
 
-TEST_F(GPIOTest, GPIO_Number_30to39_InputMode) {
+TEST_F(GPIOTest, GPIO_Number_2to19_InputMode) {
 
-    GPIO::gpio_number gpio_n = 30;
-    for(; gpio_n < 40; ++gpio_n) {
+    GPIO::gpio_number gpio_n = 2;
+    for(; gpio_n < 20; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::InputMode);
     }
 
-    gpio_n = 30;
-    auto res = gpio().read32(gpio_n);
-    //std::cout << "GPIO 30 to 39: 0x" << std::hex << res << std::dec << std::endl;
-
-    EXPECT_EQ(res, 0x0);
+    gpio_n = 2;
+    for(; gpio_n < 20; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::InputMode);
+    }
 }
 
-TEST_F(GPIOTest, GPIO_Number_40to49_OutputMode_AlternateFunction3) {
+TEST_F(GPIOTest, GPIO_Number_2to19_OutputMode_AlternateFunction3) {
 
-    GPIO::gpio_number gpio_n = 40;
-    for(; gpio_n < 45; ++gpio_n) {
+    GPIO::gpio_number gpio_n = 2;
+    for(; gpio_n < 10; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::OutputMode);
     }
 
-    for(; gpio_n < 50; ++gpio_n) {
+    for(; gpio_n < 20; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::AlternateFunction3);
     }
 
-    gpio_n = 40;
-    auto res = gpio().read32(gpio_n);
-    //std::cout << "GPIO 40 to 49: 0x" << std::hex << res << std::dec << std::endl;
+    gpio_n = 2;
+    for(; gpio_n < 10; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::OutputMode);
+    }
 
-    EXPECT_EQ(res, 0x3fff9249);
+    for(; gpio_n < 20; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::AlternateFunction3);
+    }
 }
 
-TEST_F(GPIOTest, GPIO_Number_50to53_InputMode_AlternateFunction4) {
+TEST_F(GPIOTest, GPIO_Number_20to27_InputMode_AlternateFunction4) {
 
-    GPIO::gpio_number gpio_n = 50;
-    for(; gpio_n < 52; ++gpio_n) {
+    GPIO::gpio_number gpio_n = 20;
+    for(; gpio_n < 25; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::InputMode);
     }
 
-    for(; gpio_n < 54; ++gpio_n) {
+    for(; gpio_n < 28; ++gpio_n) {
         gpio().write(gpio_n, GPIO::Config::AlternateFunction4);
     }
 
-    gpio_n = 50;
-    auto res = gpio().read32(gpio_n);
-    //std::cout << "GPIO 50 to 53: 0x" << std::hex << res << std::dec << std::endl;
+    gpio_n = 20;
+    for(; gpio_n < 25; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::InputMode);    
+    }
 
-    EXPECT_EQ(res, 0x6c0);
+    for(; gpio_n < 28; ++gpio_n) {
+        auto res = gpio().read(gpio_n);
+        EXPECT_EQ(res, GPIO::Config::AlternateFunction4);    
+    }
 }
 
 TEST_F(GPIOTest, GPIO_Number_0to31_GPSETn) {
