@@ -72,6 +72,7 @@ class GPIO {
 
         using device_register = std::uint32_t volatile;
         using gpio_number = std::uint32_t;
+        using pin_number = std::uint32_t;
 
         /** 
          * @brief Compiler give preference to this new operator over global new operator and invoke this new operator. 
@@ -119,7 +120,15 @@ class GPIO {
          **/
         void input(gpio_number gpio);
         void output(gpio_number gpio);
-        std::uint32_t level(gpio_number gpio);
+        /**
+         * @brief
+         *      The pin level registers return the actual value of the pin. The LEV{n} field gives the
+         *      value of the respective GPIO pin.
+         * @param gpio_no is the GPIO number
+         * @return current LEVn valueof that GPIO number
+        */
+        std::uint32_t GPLEVn(gpio_number gpio) const;
+        void GPLEVn(gpio_number gpio_n);
 
         /**
          * @brief
