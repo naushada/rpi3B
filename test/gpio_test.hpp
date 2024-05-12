@@ -18,7 +18,7 @@ class GPIOTest : public ::testing::Test
          *        the GPIO instance layout will be done from m_memory_region.
         */
         GPIOTest() : m_memory_region(GPIO::Register::BCM2837_MAX), m_gpio(*new(m_memory_region.data()) GPIO) {}
-        ~GPIOTest() = default;
+        virtual ~GPIOTest() override = default;
         
         virtual void SetUp() override;
         virtual void TearDown() override;
