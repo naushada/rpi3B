@@ -17,6 +17,13 @@ class GPIO {
             AlternateFunction5 = 0b010
         };
 
+        enum PullUpDownConfig: std::uint32_t {
+            Off = 0b00,
+            EnablePullDown = 0b01,
+            EnablePullUp = 0b10,
+            Reserved = 0b11
+        };
+
         enum Register: std::uint32_t {
             /* GPIO Function Selection offset */
             BCM2837_GPFSEL0,
@@ -250,10 +257,42 @@ class GPIO {
 
         /**
          * @brief
+         *      The GPIO Pull-up/down Register controls the actuation of the internal pull-up/down
+                control line to ALL the GPIO pins. This register must be used in conjunction with the 2
+                GPPUDCLKn registers.
+                Note that it is not possible to read back the current Pull-up/down settings and so it is the
+                users’ responsibility to ‘remember’ which pull-up/downs are active. The reason for this is
+                that GPIO pull-ups are maintained even in power-down mode when the core is off, when
+                all register contents is lost.
+                The Alternate function table also has the pull state which is applied after a power down.
+         * @param
+         * @return
          *      
         */
-        void GPPUD(gpio_number gpio_n);
+        void GPPUD(gpio_number gpio_n, GPIO::PullUpDownConfig cfg);
         std::uint32_t GPPUD(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      The GPIO Pull-up/down Clock Registers control the actuation of internal pull-downs on
+                the respective GPIO pins. These registers must be used in conjunction with the GPPUD
+                register to effect GPIO Pull-up/down changes. The following sequence of events is
+                required:
+                    1. Write to GPPUD to set the required control signal (i.e. Pull-up or Pull-Down or neither
+                        to remove the current Pull-up/down)
+                    2. Wait 150 cycles – this provides the required set-up time for the control signal
+                    3. Write to GPPUDCLK0/1 to clock the control signal into the GPIO pads you wish to
+                        modify – NOTE only the pads which receive a clock will be modified, all others will
+                        retain their previous state.
+                    4. Wait 150 cycles – this provides the required hold time for the control signal
+                    5. Write to GPPUD to remove the control signal
+                    6. Write to GPPUDCLK0/1 to remove the clock
+         * @param
+         * @return
+         *      
+        */
+        void GPPUDCLKn(gpio_number gpio_n);
+        std::uint32_t GPPUDCLKn(gpio_number gpio_n) const;
 
         std::uint32_t read(gpio_number gpio_n);
         std::uint32_t read32(gpio_number gpio_n);

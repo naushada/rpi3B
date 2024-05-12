@@ -345,8 +345,21 @@ std::uint32_t GPIO::GPAFENn(gpio_number gpio_n) const {
     return(0);
 }
 
+void GPIO::GPPUD(gpio_number gpio_n, GPIO::PullUpDownConfig cfg) {
+    m_register[Register::BCM2837_GPPUD] |= (3U & cfg);
+}
 
+std::uint32_t GPIO::GPPUD(gpio_number gpio_n) const {
+    return(m_register[Register::BCM2837_GPPUD] & 3U);
+}
 
+void GPIO::GPPUDCLKn(gpio_number gpio_n) {
+
+}
+
+std::uint32_t GPIO::GPPUDCLKn(gpio_number gpio_n) const {
+
+}
 
 
 
