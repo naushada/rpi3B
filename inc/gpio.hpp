@@ -93,12 +93,12 @@ class GPIO {
         }
 
         GPIO() {
-            #if 0
-            for(auto idx = 0; idx < Register::BCM2837_MAX; ++idx) {
+#if 0
+            for(std::uint32_t idx = 0; idx < Register::BCM2837_MAX; ++idx) {
                 std::printf("\nAddress of this 0x%X: ", &m_register[idx]);
             }
             std::printf("\n");
-            #endif
+#endif
         }
 
         ~GPIO() = default;
