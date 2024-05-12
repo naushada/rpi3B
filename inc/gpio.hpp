@@ -158,6 +158,103 @@ class GPIO {
         */
         void GPSETn(gpio_number gpio_n);
         std::uint32_t GPGETn(gpio_number gpio_n);
+        /**
+         * @brief
+         *      The event detect status registers are used to record level and edge events on the
+                GPIO pins. The relevant bit in the event detect status registers is set whenever: 1)
+                an edge is detected that matches the type of edge programmed in the rising/falling
+                edge detect enable registers, or 2) a level is detected that matches the type of level
+                programmed in the high/low level detect enable registers. The bit is cleared by
+                writing a “1” to the relevant bit.
+         * @param
+         * @return 
+        */
+        void GPEDSn(gpio_number gpio_n);
+        std::uint32_t GPEDSn(gpio_number gpio_n) const;
+        /**
+         * @brief
+         *      The rising edge detect enable registers define the pins for which a rising edge
+                transition sets a bit in the event detect status registers (GPEDSn). When the
+                relevant bits are set in both the GPRENn and GPFENn registers, any transition (1
+                to 0 and 0 to 1) will set a bit in the GPEDSn registers. The GPRENn registers use
+                synchronous edge detection. This means the input signal is sampled using the
+                system clock and then it is looking for a “011” pattern on the sampled signal. This
+                has the effect of suppressing glitches.
+         * @param
+         * @return
+        */
+        void GPRENn(gpio_number gpio_n);
+        std::uint32_t GPRENn(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      The falling edge detect enable registers define the pins for which a falling edge
+                transition sets a bit in the event detect status registers (GPEDSn). When the relevant
+                bits are set in both the GPRENn and GPFENn registers, any transition (1 to 0 and 0
+                to 1) will set a bit in the GPEDSn registers. The GPFENn registers use synchronous
+                edge detection. This means the input signal is sampled using the system clock and
+                then it is looking for a “100” pattern on the sampled signal. This has the effect of
+                suppressing glitches.
+         * @param
+         * @return
+        */
+        void GPFENn(gpio_number gpio_n);
+        std::uint32_t GPFENn(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      The high level detect enable registers define the pins for which a high level sets a bit in
+                the event detect status register (GPEDSn). If the pin is still high when an attempt is
+                made to clear the status bit in GPEDSn then the status bit will remain set.
+         * @param
+         * @return
+        */
+        void GPHENn(gpio_number gpio_n);
+        std::uint32_t GPHENn(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      The low level detect enable registers define the pins for which a low level sets a bit in
+                the event detect status register (GPEDSn). If the pin is still low when an attempt is
+                made to clear the status bit in GPEDSn then the status bit will remain set.
+         * @param
+         * @return
+        */
+        void GPLENn(gpio_number gpio_n);
+        std::uint32_t GPLENn(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      The asynchronous rising edge detect enable registers define the pins for which a
+                asynchronous rising edge transition sets a bit in the event detect status registers
+                (GPEDSn).
+                Asynchronous means the incoming signal is not sampled by the system clock. As such
+                rising edges of very short duration can be detected.
+         *  @param
+         *  @return
+        */
+        void GPARENn(gpio_number gpio_n);
+        std::uint32_t GPARENn(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      The asynchronous falling edge detect enable registers define the pins for which a
+                asynchronous falling edge transition sets a bit in the event detect status registers
+                (GPEDSn). Asynchronous means the incoming signal is not sampled by the system
+                clock. As such falling edges of very short duration can be detected.
+         * @param
+         * @return
+        */
+        void GPAFENn(gpio_number gpio_n);
+        std::uint32_t GPAFENn(gpio_number gpio_n) const;
+
+        /**
+         * @brief
+         *      
+        */
+        void GPPUD(gpio_number gpio_n);
+        std::uint32_t GPPUD(gpio_number gpio_n) const;
+
         std::uint32_t read(gpio_number gpio_n);
         std::uint32_t read32(gpio_number gpio_n);
         void write32(gpio_number gpio_n, std::uint32_t value);

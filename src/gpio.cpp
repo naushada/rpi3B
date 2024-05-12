@@ -135,17 +135,215 @@ std::uint32_t GPIO::GPGETn(gpio_number gpio_n) {
     return(0);
 }
 
+void GPIO::GPEDSn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
 
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
 
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPEDS0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPEDS1] |= (1U << (pin_no - 32));
+    }
+}
 
+std::uint32_t GPIO::GPEDSn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
 
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
 
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPEDS0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPEDS1] >> (pin_no - 32)) & 01U);
+    }
 
+    return(0);
+}
 
+void GPIO::GPRENn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
 
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
 
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPREN0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPREN1] |= (1U << (pin_no - 32));
+    }
+}
 
+std::uint32_t GPIO::GPRENn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
 
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPREN0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPREN1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
+}
+
+void GPIO::GPFENn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPFEN0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPFEN1] |= (1U << (pin_no - 32));
+    }
+}
+
+std::uint32_t GPIO::GPFENn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPFEN0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPFEN1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
+}
+
+void GPIO::GPHENn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPHEN0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPHEN1] |= (1U << (pin_no - 32));
+    }
+}
+
+std::uint32_t GPIO::GPHENn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPHEN0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPHEN1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
+}
+
+void GPIO::GPLENn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPLEN0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPLEN1] |= (1U << (pin_no - 32));
+    }
+}
+
+std::uint32_t GPIO::GPLENn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPLEN0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPLEN1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
+}
+
+void GPIO::GPARENn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPAREN0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPAREN1] |= (1U << (pin_no - 32));
+    }
+}
+
+std::uint32_t GPIO::GPARENn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPAREN0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPAREN1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
+}
+
+void GPIO::GPAFENn(gpio_number gpio_n) {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            m_register[Register::BCM2837_GPAFEN0] |= (1U << pin_no);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        m_register[Register::BCM2837_GPAFEN1] |= (1U << (pin_no - 32));
+    }
+}
+
+std::uint32_t GPIO::GPAFENn(gpio_number gpio_n) const {
+    auto it = std::find_if(gpioNo2PinNo.begin(), gpioNo2PinNo.end(), [&](const auto& ent) -> bool {return(gpio_n == ent.first);});
+
+    if(it != gpioNo2PinNo.end()) {
+        auto pin_no = it->second;
+
+        if(pin_no < 32) {
+            return((m_register[Register::BCM2837_GPAFEN0]  >> pin_no) & 01U);
+        }
+        /*set the bits 0 - 21 for GPIO greater than 31 */
+        return((m_register[Register::BCM2837_GPAFEN1] >> (pin_no - 32)) & 01U);
+    }
+
+    return(0);
+}
 
 
 
