@@ -109,6 +109,13 @@ TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_Write_BOTH_Var1) {
     EXPECT_EQ(res, 21);
 }
 
+TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_Write_BOTH_Var2) {
+    clock().write(RPi3B::ClockRegistersAddress::Register::CM_GP2DIV, RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE, ((10 << 12) | 939));
+    auto res = clock().read(RPi3B::ClockRegistersAddress::Register::CM_GP2DIV, RPi3B::ClockRegistersAddress::ClockDivisor::DIVF);
+    EXPECT_EQ(res, 939);
+    res = clock().read(RPi3B::ClockRegistersAddress::Register::CM_GP2DIV, RPi3B::ClockRegistersAddress::ClockDivisor::DIVI);
+    EXPECT_EQ(res, 10);
+}
 
 
 
