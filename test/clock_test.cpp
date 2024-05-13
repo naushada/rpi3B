@@ -15,7 +15,32 @@ void CLOCKTest::TestBody() {
 
 }
 
-TEST_F(CLOCKTest, Clock) {
+TEST_F(CLOCKTest, ClockRegister_CM_GP0DIV_Read_DIVI) {
+    
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP1DIV_Read_DIVI) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_Read_DIVI) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP0DIV_Read_DIVF) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP1DIV_Read_DIVF) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_Read_DIVF) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP0DIV_Read_BOTH) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP1DIV_Read_BOTH) {
+}
+
+TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_Read_BOTH) {
 }
 
 

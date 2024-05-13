@@ -173,9 +173,11 @@ namespace RPi3B {
 
         using device_register = volatile std::atomic<std::uint32_t>; //@brief This ensures that this is a thread safe
         ClockRegistersAddress() {
+            /*
             for(auto idx = 0; idx < Register::CM_GPn_MAX; ++idx)
                 std::printf("Clock Register is 0x%X\n", &m_register[idx]);
             std::printf("\n");
+            */
         }
         ~ClockRegistersAddress() {}
 
