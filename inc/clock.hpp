@@ -12,14 +12,14 @@ class CLOCK {
         using gpio_number = std::uint32_t;
         using pin_number = std::uint32_t;
 
-        CLOCK() : m_memory(*new ClockRegistersAddress) {}
+        CLOCK() : m_memory(*new RPi3B::ClockRegistersAddress) {}
 
-        CLOCK(auto region) : m_memory(*new(region) ClockRegistersAddress) {}
+        CLOCK(auto region) : m_memory(*new(region) RPi3B::ClockRegistersAddress) {}
 
         ~CLOCK() = default;
 
     private:
-        ClockRegistersAddress& m_memory;
+        RPi3B::ClockRegistersAddress& m_memory;
 };
 
 

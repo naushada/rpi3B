@@ -16,7 +16,7 @@ class CLOCKTest : public ::testing::Test
          * @brief Memory region for CLOCK instance will be taken from m_memory_region,
          *        the CLOCK instance layout will be done from m_memory_region.
         */
-        CLOCKTest() : m_memory_region(ClockRegistersAddress::AddressOffset::CM_GPn_MAX + 1), 
+        CLOCKTest() : m_memory_region(RPi3B::ClockRegistersAddress::AddressOffset::CM_GPn_MAX + 1), 
                       m_clock(CLOCK(m_memory_region.data())) {
             /*
             ::printf("start memory_region: 0x%X ", m_memory_region.data());

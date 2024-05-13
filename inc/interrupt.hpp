@@ -12,14 +12,14 @@ class IRQ {
         using gpio_number = std::uint32_t;
         using pin_number = std::uint32_t;
 
-        IRQ() : m_memory(*new InterruptRegisterAddress) {}
+        IRQ() : m_memory(*new RPi3B::InterruptRegisterAddress) {}
 
-        IRQ(auto region) : m_memory(*new(region) InterruptRegisterAddress) {}
+        IRQ(auto region) : m_memory(*new(region) RPi3B::InterruptRegisterAddress) {}
 
         ~IRQ() = default;
 
     private:
-        InterruptRegisterAddress& m_memory;
+        RPi3B::InterruptRegisterAddress& m_memory;
 };
 
 

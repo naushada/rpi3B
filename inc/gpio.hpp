@@ -12,9 +12,9 @@ class GPIO {
         using gpio_number = std::uint32_t;
         using pin_number = std::uint32_t;
 
-        GPIO() : m_memory(*new GPIORegistersAddress) {}
+        GPIO() : m_memory(*new RPi3B::GPIORegistersAddress) {}
 
-        GPIO(auto region) : m_memory(*new(region) GPIORegistersAddress) {}
+        GPIO(auto region) : m_memory(*new(region) RPi3B::GPIORegistersAddress) {}
 
         ~GPIO() = default;
 
@@ -176,7 +176,7 @@ class GPIO {
          * @return
          *      
         */
-        void GPPUD(gpio_number gpio_n, GPIORegistersAddress::PullUpDownConfig cfg);
+        void GPPUD(gpio_number gpio_n, RPi3B::GPIORegistersAddress::PullUpDownConfig cfg);
         std::uint32_t GPPUD(gpio_number gpio_n) const;
 
         /**
@@ -204,14 +204,14 @@ class GPIO {
         std::uint32_t read(gpio_number gpio_n);
         std::uint32_t read32(gpio_number gpio_n);
         void write32(gpio_number gpio_n, std::uint32_t value);
-        void write(gpio_number gpio_n, GPIORegistersAddress::Config cfg);
+        void write(gpio_number gpio_n, RPi3B::GPIORegistersAddress::Config cfg);
 
-        GPIORegistersAddress& memory() const {
+        RPi3B::GPIORegistersAddress& memory() const {
             return(m_memory);
         }
 
     private:
-        GPIORegistersAddress& m_memory;
+        RPi3B::GPIORegistersAddress& m_memory;
 
 };
 

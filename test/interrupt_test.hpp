@@ -17,7 +17,7 @@ class IRQTest : public ::testing::Test
          * @brief Memory region for IRQ instance will be taken from m_memory_region,
          *        the IRQ instance layout will be done from m_memory_region.
         */
-        IRQTest() : m_memory_region(InterruptRegisterAddress::Register::IRQs_ALL_MAX), 
+        IRQTest() : m_memory_region(RPi3B::InterruptRegisterAddress::Register::IRQs_ALL_MAX), 
                     m_irq(IRQ(m_memory_region.data())) {
             
         }
