@@ -17,20 +17,20 @@ class GPIOTest : public ::testing::Test
          * @brief Memory region for GPIO instance will be taken from m_memory_region,
          *        the GPIO instance layout will be done from m_memory_region.
         */
-        GPIOTest() : m_memory_region(GPIO::Register::BCM2837_MAX), m_gpio(*new(m_memory_region.data()) GPIO) {}
+        GPIOTest() : m_memory_region(GPIORegistersAddress::Register::BCM2837_MAX), m_gpio(GPIO(m_memory_region.data())) {}
         virtual ~GPIOTest() override = default;
         
         virtual void SetUp() override;
         virtual void TearDown() override;
         virtual void TestBody() override;
 
-        GPIO& gpio() const {
+        GPIO gpio() const {
             return(m_gpio);
         }
 
     private:
         std::vector<std::uint32_t> m_memory_region;
-        GPIO& m_gpio;
+        GPIO m_gpio;
         std::unordered_map<std::string, std::string> m_gpio2PinMap;
 };
 

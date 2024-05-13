@@ -5,109 +5,29 @@
 #include <cstdio>
 #include <atomic>
 
+#include "memory_map.hpp"
+
 class GPIO {
     public:
-        enum Config: std::uint32_t {
-            InputMode = 0b000,
-            OutputMode = 0b001,
-            AlternateFunction0 = 0b100,
-            AlternateFunction1 = 0b101,
-            AlternateFunction2 = 0b110,
-            AlternateFunction3 = 0b111,
-            AlternateFunction4 = 0b011,
-            AlternateFunction5 = 0b010
-        };
-
-        enum PullUpDownConfig: std::uint32_t {
-            Off = 0b00,
-            EnablePullDown = 0b01,
-            EnablePullUp = 0b10,
-            Reserved = 0b11
-        };
-
-        enum Register: std::uint32_t {
-            /* GPIO Function Selection offset */
-            BCM2837_GPFSEL0,
-            BCM2837_GPFSEL1,
-            BCM2837_GPFSEL2,
-            BCM2837_GPFSEL3,
-            BCM2837_GPFSEL4,
-            BCM2837_GPFSEL5,
-            BCM2837_GPFSEL_RESERVED,
-            /* GPIO SET Address offset */
-            BCM2837_GPSET0,
-            BCM2837_GPSET1,
-            BCM2837_GPSET_RESERVED,
-            /* Offset for clearing the GPIO */
-            BCM2837_GPCLR0,
-            BCM2837_GPCLR1,
-            BCM2837_GPCLR_RESERVED,
-            /* Offset for GPIO LEV0/1 */
-            BCM2837_GPLEV0,
-            BCM2837_GPLEV1,
-            BCM2837_GPLEV_RESERVED,
-            BCM2837_GPEDS0,
-            BCM2837_GPEDS1,
-            BCM2837_GPEDS_RESERVED,
-            BCM2837_GPREN0,
-            BCM2837_GPREN1,
-            BCM2837_GPREN_RESERVED,
-            BCM2837_GPFEN0,
-            BCM2837_GPFEN1,
-            BCM2837_GPFEN_RESERVED,
-            BCM2837_GPHEN0,
-            BCM2837_GPHEN1,
-            BCM2837_GPHEN_RESERVED,
-            BCM2837_GPLEN0,
-            BCM2837_GPLEN1,
-            BCM2837_GPLEN_RESERVED,
-            BCM2837_GPAREN0,
-            BCM2837_GPAREN1,
-            BCM2837_GPAREN_RESERVED,
-            BCM2837_GPAFEN0,
-            BCM2837_GPAFEN1,
-            BCM2837_GPAFEN_RESERVED,
-            BCM2837_GPPUD,
-            BCM2837_GPPUDCLK0,
-            BCM2837_GPPUDCLK1,
-            BCM2837_RESERVED,
-            BCM2837_TEST1,
-            BCM2837_TEST2,
-            BCM2837_TEST3,
-            BCM2837_TEST4,
-            BCM2837_MAX
-        };
-   
-        using device_register = volatile std::atomic<std::uint32_t>; //@brief This ensures that this is a thread safe
         using gpio_number = std::uint32_t;
         using pin_number = std::uint32_t;
 
-        /** 
-         * @brief Compiler give preference to this new operator over global new operator and invoke this new operator. 
-         * @param nBytes Number of bytes to be allocated
-         * @param region is the memory region to be return if present.
-         * @return pointer to void
-         */
-        void *operator new(std::size_t nBytes, void *region=nullptr) {
-            (void)nBytes;
-            if(nullptr == region) {
-                /**
-                 * @brief 
-                 *  The address is Physical address of GPIO for Raspberry Pi 3B and
-                 *  is used for memory map for GPIO.
-                 */
-                return reinterpret_cast<void *>((0x3F000000) + (0x00200000));
-            }
-            return(region);
-        }
-
-        GPIO() {
-#if 0
-            for(std::uint32_t idx = 0; idx < Register::BCM2837_MAX; ++idx) {
-                std::printf("\nAddress of this 0x%X: ", &m_register[idx]);
+        GPIO() : m_memory(*new GPIORegistersAddress) {
+            
+            for(std::uint32_t idx = 0; idx < GPIORegistersAddress::Register::BCM2837_MAX; ++idx) {
+                std::printf("\nAddress of this 0x%X: ", &memory().m_register[idx]);
             }
             std::printf("\n");
-#endif
+            
+        }
+
+        GPIO(auto region) : m_memory(*new(region) GPIORegistersAddress) {
+            /*
+            for(std::uint32_t idx = 0; idx < GPIORegistersAddress::Register::BCM2837_MAX; ++idx) {
+                std::printf("\nAddress of this 0x%X: ", &memory().m_register[idx]);
+            }
+            std::printf("\n");
+            */
         }
 
         ~GPIO() = default;
@@ -270,7 +190,7 @@ class GPIO {
          * @return
          *      
         */
-        void GPPUD(gpio_number gpio_n, GPIO::PullUpDownConfig cfg);
+        void GPPUD(gpio_number gpio_n, GPIORegistersAddress::PullUpDownConfig cfg);
         std::uint32_t GPPUD(gpio_number gpio_n) const;
 
         /**
@@ -298,15 +218,14 @@ class GPIO {
         std::uint32_t read(gpio_number gpio_n);
         std::uint32_t read32(gpio_number gpio_n);
         void write32(gpio_number gpio_n, std::uint32_t value);
-        void write(gpio_number gpio_n, GPIO::Config cfg);
+        void write(gpio_number gpio_n, GPIORegistersAddress::Config cfg);
+
+        GPIORegistersAddress& memory() const {
+            return(m_memory);
+        }
 
     private:
-        /** 
-         * @brief
-         * address for m_register will be 
-         * [0x3F200000, 0x3F200004, 0x3F200008, 0x3F20000C, 0x3F200010, 0x3F200014, 0x3F200018, 0x3F20001C  ... 0x3F2000B0] 
-         **/
-        device_register m_register[Register::BCM2837_MAX];
+        GPIORegistersAddress& m_memory;
 
 };
 
