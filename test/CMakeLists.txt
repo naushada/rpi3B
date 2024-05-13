@@ -7,7 +7,7 @@ include_directories(../inc)
 include_directories(test)
 
 #Adding Complier flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -g -Wall -Wextra -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -g -Wall -Wextra")
 
 #However, the file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "*.cpp"  
