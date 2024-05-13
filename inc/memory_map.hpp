@@ -116,6 +116,17 @@ namespace RPi3B {
             CM_GP2DIV,
             CM_GPn_MAX
         };
+        
+        enum CM_GPnCTL_Type: std::uint32_t {
+            SRC,
+            ENAB,
+            KILL,
+            Unused,
+            BUSY,
+            FLIP,
+            MASH,
+            ALL
+        };
 
         enum ClockSource: std::uint32_t {
             Ground = 0,

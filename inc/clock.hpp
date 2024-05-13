@@ -11,6 +11,7 @@ class CLOCK {
     public:
         using gpio_number = std::uint32_t;
         using divisor_type = std::uint32_t;
+        using control_type = std::uint32_t;
 
         CLOCK() : m_memory(*new RPi3B::ClockRegistersAddress) {}
 
@@ -26,6 +27,19 @@ class CLOCK {
         divisor_type CM_GP2DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor) const;
         void write(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::ClockDivisor divif ,divisor_type value);
         divisor_type read(RPi3B::ClockRegistersAddress::Register, RPi3B::ClockRegistersAddress::ClockDivisor divif) const;
+
+        /**
+         * @brief
+         *      CLOCK Control Interface
+        */
+        void CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value);
+        divisor_type CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type) const;
+        void CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value);
+        divisor_type CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type) const;
+        void CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value);
+        divisor_type CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type) const;
+        void write(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type type ,divisor_type value);
+        divisor_type read(RPi3B::ClockRegistersAddress::Register, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type type) const;
 
         auto& memory() const {
             return(m_memory);

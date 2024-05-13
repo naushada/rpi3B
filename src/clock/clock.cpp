@@ -251,4 +251,62 @@ CLOCK::divisor_type CLOCK::read(RPi3B::ClockRegistersAddress::Register reg, RPi3
     return(value);
 }
 
+void CLOCK::CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value) {
+
+}
+
+CLOCK::divisor_type CLOCK::CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctlType) const {
+
+}
+
+void CLOCK::CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value) {
+
+}
+
+CLOCK::divisor_type CLOCK::CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl) const {
+
+}
+
+void CLOCK::CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value) {
+
+}
+
+CLOCK::divisor_type CLOCK::CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl) const {
+
+}
+
+void CLOCK::write(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type type ,divisor_type value) {
+
+}
+
+CLOCK::control_type CLOCK::read(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type type) const {
+    CLOCK::control_type value;
+    switch (reg)
+    {
+        case RPi3B::ClockRegistersAddress::Register::CM_GP0CTL:
+        {
+            value = CM_GP0CTL(type);
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::Register::CM_GP1CTL:
+        {
+            value = CM_GP1CTL(type);
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::Register::CM_GP2CTL:
+        {
+            value = CM_GP2CTL(type);
+        }
+        break;
+    
+        default:
+            /// Error Handling
+            break;
+    }
+    return(value);
+}
+
+
 #endif /*__clock_cpp__*/
