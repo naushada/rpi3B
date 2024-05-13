@@ -12,8 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -g -Wall -Wextra")
 #However, the file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "*.cpp"  
                     "../src/gpio/gpio.cpp"
-                    "../src/clock/gpio.cpp"
-                    "../src/interrupt/gpio.cpp"
+                    "../src/clock/clock.cpp"
+                    "../src/interrupt/interrupt.cpp"
                     )
 
 enable_testing()
