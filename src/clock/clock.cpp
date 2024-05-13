@@ -10,21 +10,21 @@ void CLOCK::CM_GP0DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, CLOCK:
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] |= (((~(1U << 12)) & value) << 12);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] |= (((~((~0U) << 12)) & value) << 12);
         }
         break;
 
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVF:
         {
             /// SET bits 0...11 --- Float divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] |= ((~(1U << 12)) & value);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] |= ((~((~0U) << 12)) & value);
         }
         break;
 
         case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
         {
             /// SET bits 0...23 --- both Integer & Float divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] |= ((~(1U << 24)) & value);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] |= ((~((~0U) << 24)) & value);
         }
         break;
     
@@ -42,7 +42,7 @@ CLOCK::divisor_type CLOCK::CM_GP0DIV(RPi3B::ClockRegistersAddress::ClockDivisor 
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            value = (memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] >> 12) & (~(1U << 12));
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] >> 12) & (~((~0U) << 12));
         }
         break;
 
@@ -56,7 +56,7 @@ CLOCK::divisor_type CLOCK::CM_GP0DIV(RPi3B::ClockRegistersAddress::ClockDivisor 
         case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
         {
             /// SET bits 0...23 --- both Integer & Float divisor
-            value = memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] & (~(1U << 24U));
+            value = memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP0DIV] & (~((~0U) << 24U));
         }
         break;
     
@@ -73,7 +73,7 @@ void CLOCK::CM_GP1DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, CLOCK:
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] |= (((~(1U << 12)) & value) << 12);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] |= (((~((~0U) << 12)) & value) << 12);
         }
         break;
 
@@ -87,7 +87,7 @@ void CLOCK::CM_GP1DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, CLOCK:
         case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
         {
             /// SET bits 0...23 --- both Integer & Float divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] |= (~(1U << 24) & value);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] |= (~((~0U) << 24) & value);
         }
         break;
     
@@ -105,7 +105,7 @@ CLOCK::divisor_type CLOCK::CM_GP1DIV(RPi3B::ClockRegistersAddress::ClockDivisor 
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            value = (memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] >> 12) & (~(1U << 12));
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] >> 12) & (~((~0U) << 12));
         }
         break;
 
@@ -119,7 +119,7 @@ CLOCK::divisor_type CLOCK::CM_GP1DIV(RPi3B::ClockRegistersAddress::ClockDivisor 
         case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
         {
             /// SET bits 0...23 --- both Integer & Float divisor
-            value = memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] & (~(1U << 24));
+            value = memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP1DIV] & (~((~0U) << 24));
         }
         break;
     
@@ -136,7 +136,7 @@ void CLOCK::CM_GP2DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, CLOCK:
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] |= ((~(1U << 12) & value) << 12);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] |= ((~((~0U) << 12) & value) << 12);
         }
         break;
 
@@ -150,7 +150,7 @@ void CLOCK::CM_GP2DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, CLOCK:
         case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
         {
             /// SET bits 0...23 --- both Integer & Float divisor
-            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] |= (~(1U << 24) & value);
+            memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] |= (~((~0U) << 24) & value);
         }
         break;
     
@@ -168,14 +168,14 @@ CLOCK::divisor_type CLOCK::CM_GP2DIV(RPi3B::ClockRegistersAddress::ClockDivisor 
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            value = (memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] >> 12) & (~(1U << 12));
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] >> 12) & (~((~0U) << 12));
         }
         break;
 
         case RPi3B::ClockRegistersAddress::ClockDivisor::DIVF:
         {
             /// SET bits 0...11 --- Float divisor
-            value = memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] & (~(1U << 12));
+            value = memory().m_register[RPi3B::ClockRegistersAddress::Register::CM_GP2DIV] & (~((~0U) << 12));
         }
         break;
 
