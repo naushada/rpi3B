@@ -12,23 +12,9 @@ class GPIO {
         using gpio_number = std::uint32_t;
         using pin_number = std::uint32_t;
 
-        GPIO() : m_memory(*new GPIORegistersAddress) {
-            
-            for(std::uint32_t idx = 0; idx < GPIORegistersAddress::Register::BCM2837_MAX; ++idx) {
-                std::printf("\nAddress of this 0x%X: ", &memory().m_register[idx]);
-            }
-            std::printf("\n");
-            
-        }
+        GPIO() : m_memory(*new GPIORegistersAddress) {}
 
-        GPIO(auto region) : m_memory(*new(region) GPIORegistersAddress) {
-            /*
-            for(std::uint32_t idx = 0; idx < GPIORegistersAddress::Register::BCM2837_MAX; ++idx) {
-                std::printf("\nAddress of this 0x%X: ", &memory().m_register[idx]);
-            }
-            std::printf("\n");
-            */
-        }
+        GPIO(auto region) : m_memory(*new(region) GPIORegistersAddress) {}
 
         ~GPIO() = default;
 

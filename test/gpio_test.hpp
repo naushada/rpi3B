@@ -17,7 +17,13 @@ class GPIOTest : public ::testing::Test
          * @brief Memory region for GPIO instance will be taken from m_memory_region,
          *        the GPIO instance layout will be done from m_memory_region.
         */
-        GPIOTest() : m_memory_region(GPIORegistersAddress::Register::BCM2837_MAX), m_gpio(GPIO(m_memory_region.data())) {}
+        GPIOTest() : m_memory_region(GPIORegistersAddress::Register::BCM2837_MAX + 1), m_gpio(GPIO(m_memory_region.data())) {
+            /*
+            ::printf("start memory_region: 0x%X ", m_memory_region.data());
+            ::printf("end memory_region: 0x%X ", m_memory_region.data() + GPIORegistersAddress::Register::BCM2837_MAX+1);
+            ::printf("GPIO: 0x%X ", &m_gpio.memory().m_register[0]);
+            */
+        }
         virtual ~GPIOTest() override = default;
         
         virtual void SetUp() override;

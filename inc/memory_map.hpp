@@ -79,6 +79,8 @@ struct GPIORegistersAddress {
     };
    
     using device_register = volatile std::atomic<std::uint32_t>; //@brief This ensures that this is a thread safe
+    GPIORegistersAddress() {}
+    ~GPIORegistersAddress() {}
 
     /** 
      * @brief Compiler give preference to this new operator over global new operator and invoke this new operator. 
