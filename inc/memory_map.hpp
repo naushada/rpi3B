@@ -107,7 +107,7 @@ namespace RPi3B {
 
     struct ClockRegistersAddress {
 
-        enum AddressOffset : std::uint32_t {
+        enum Register : std::uint32_t {
             CM_GP0CTL,
             CM_GP0DIV,
             CM_GP1CTL,
@@ -148,8 +148,35 @@ namespace RPi3B {
             */
         };
 
+        enum ClockDivisor: std::uint32_t {
+            /**
+             * @brief
+             *      Fractional part of divisor
+                    To avoid lock-ups and glitches do not change this
+                    control while BUSY=1.
+            */
+            DIVF,
+            /**
+             * @brief
+             *      Integer part of divisor
+                    This value has a minimum limit determined by the
+                    MASH setting. See text for details. To avoid lock-ups
+                    and glitches do not change this control while BUSY=1.
+            */
+            DIVI,
+            /**
+             * @brief
+             *      Use BOTH_VALUE to write both Integer & Fractional part
+            */
+            BOTH_VALUE
+        };
+
         using device_register = volatile std::atomic<std::uint32_t>; //@brief This ensures that this is a thread safe
-        ClockRegistersAddress() {}
+        ClockRegistersAddress() {
+            for(auto idx = 0; idx < Register::CM_GPn_MAX; ++idx)
+                std::printf("Clock Register is 0x%X\n", &m_register[idx]);
+            std::printf("\n");
+        }
         ~ClockRegistersAddress() {}
 
         /** 
@@ -171,7 +198,7 @@ namespace RPi3B {
          * address for m_register will be 
          * [0x3F100000, 0x3F100004, 0x3F100008, 0x3F10000C, 0x3F100010, 0x3F100014, 0x3F100018, 0x3F10001C  ... 0x3F1000B0] 
          **/
-        device_register m_register[AddressOffset::CM_GPn_MAX];
+        device_register m_register[Register::CM_GPn_MAX];
     };
 
     struct InterruptRegisterAddress {
@@ -191,7 +218,11 @@ namespace RPi3B {
 
         
         using device_register = volatile std::atomic<std::uint32_t>; //@brief This ensures that this is a thread safe
-        InterruptRegisterAddress() {}
+        InterruptRegisterAddress() {
+            for(auto idx = 0; idx < Register::IRQs_ALL_MAX; ++idx)
+                std::printf("Interrupt Register is 0x%X\n", &m_register[idx]);
+            std::printf("\n");
+        }
         ~InterruptRegisterAddress() {}
 
         /** 
