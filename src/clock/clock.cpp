@@ -3,6 +3,114 @@
 
 #include "clock.hpp"
 
+void CLOCK::set_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::ClockDivisor field, divisor_type value) {
+
+    switch (field)
+    {
+    case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
+        {
+            /// SET bits 12...23 ---- Integer Divisor
+            memory().m_register[reg] |= (((~((~0U) << 12)) & value) << 12);
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::ClockDivisor::DIVF:
+        {
+            /// SET bits 0...11 --- Float divisor
+            memory().m_register[reg] |= ((~((~0U) << 12)) & value);
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
+        {
+            /// SET bits 0...23 --- both Integer & Float divisor
+            memory().m_register[reg] |= ((~((~0U) << 24)) & value);
+        }
+        break;
+    
+        default:
+            /// Error Handling
+            break;
+    }
+}
+
+void CLOCK::clr_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::ClockDivisor field) {
+    switch (field)
+    {
+    case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
+        {
+            /// SET bits 12...23 ---- Integer Divisor
+            memory().m_register[reg] &= (((~(1U << 12)) << 12) |(~(1U << 12)));
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::ClockDivisor::DIVF:
+        {
+            /// SET bits 0...11 --- Float divisor
+            memory().m_register[reg] &= ((~0U) << 12);
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
+        {
+            /// SET bits 0...23 --- both Integer & Float divisor
+            memory().m_register[reg] &= ((~0U) << 24);
+        }
+        break;
+    
+        default:
+            /// Error Handling
+            break;
+    }
+}
+
+CLOCK::divisor_type CLOCK::get_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::ClockDivisor field) {
+
+    CLOCK::divisor_type value = 0;
+    switch (field)
+    {
+    case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
+        {
+            /// SET bits 12...23 ---- Integer Divisor
+            value = (memory().m_register[reg] >> 12) & (~(1U << 12));
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::ClockDivisor::DIVF:
+        {
+            /// SET bits 0...11 --- Float divisor
+            value = memory().m_register[reg] & (~(1U << 12));
+        }
+        break;
+
+        case RPi3B::ClockRegistersAddress::ClockDivisor::BOTH_VALUE:
+        {
+            /// SET bits 0...23 --- both Integer & Float divisor
+            value = memory().m_register[reg] & (~(1U << 24));
+        }
+        break;
+    
+        default:
+            /// Error Handling
+            break;
+    }
+
+    return(value);
+}
+
+void CLOCK::set_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field, divisor_type value) {
+
+}
+
+void CLOCK::get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field) {
+
+}
+
+CLOCK::control_type CLOCK::clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field) {
+
+}
+
+
 void CLOCK::CM_GP0DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, CLOCK::divisor_type value) {
 
     switch (divisor)
