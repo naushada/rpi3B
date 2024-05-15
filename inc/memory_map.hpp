@@ -92,6 +92,13 @@ namespace RPi3B {
         void *operator new(std::size_t nBytes, void *region=nullptr) {
             (void)nBytes;
             if(nullptr == region) {
+                /**
+                 * @brief
+                 *      Physical addresses range from 0x3F000000 to 0x3FFFFFFF for peripherals. The
+                        bus addresses for peripherals are set up to map onto the peripheral bus address range
+                        starting at 0x7E000000. Thus a peripheral advertised here at bus address 0x7Ennnnnn is
+                        available at physical address 0x3Fnnnnnn.
+                */
                 return reinterpret_cast<void *>((0x3F000000) + (0x00200000));
             }
             return(region);

@@ -308,8 +308,58 @@ void CLOCK::CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_
 
 }
 
-CLOCK::divisor_type CLOCK::CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctlType) const {
+CLOCK::control_type CLOCK::CM_GP0CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctlType) const {
     
+    CLOCK::control_type value = 0;
+    switch (ctlType)
+    {
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
+        {
+            value = memory().m_register[RPi3B::ClockRegistersAddress::CM_GP0CTL] & (~(~0U << 4));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP0CTL] >> 5) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP0CTL] >> 6) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::BUSY:
+        {
+            /* Read only register */
+        }
+        break;
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::FLIP:
+        {
+            /* Read only register */
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP0CTL] >> 10) & (~(~0U << 2));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
+        {
+            value = memory().m_register[RPi3B::ClockRegistersAddress::CM_GP0CTL];
+        }
+        break;
+
+    
+    default:
+        break;
+    }
+
+    return(value);
 }
 
 void CLOCK::CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value) {
@@ -369,8 +419,58 @@ void CLOCK::CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_
 
 }
 
-CLOCK::divisor_type CLOCK::CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl) const {
+CLOCK::control_type CLOCK::CM_GP1CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctlType) const {
 
+    CLOCK::control_type value = 0;
+    switch (ctlType)
+    {
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
+        {
+            value = memory().m_register[RPi3B::ClockRegistersAddress::CM_GP1CTL] & (~(~0U << 4));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP1CTL] >> 5) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP1CTL] >> 6) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::BUSY:
+        {
+            /* Read only register */
+        }
+        break;
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::FLIP:
+        {
+            /* Read only register */
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP1CTL] >> 10) & (~(~0U << 2));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
+        {
+            value = memory().m_register[RPi3B::ClockRegistersAddress::CM_GP1CTL];
+        }
+        break;
+
+    
+    default:
+        break;
+    }
+
+    return(value);
 }
 
 void CLOCK::CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_type value) {
@@ -430,11 +530,60 @@ void CLOCK::CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl, divisor_
 
 }
 
-CLOCK::divisor_type CLOCK::CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctl) const {
+CLOCK::control_type CLOCK::CM_GP2CTL(RPi3B::ClockRegistersAddress::CM_GPnCTL_Type ctlType) const {
 
+    CLOCK::control_type value = 0;
+    switch (ctlType)
+    {
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
+        {
+            value = memory().m_register[RPi3B::ClockRegistersAddress::CM_GP2CTL] & (~(~0U << 4));
+        }
+        break;
 
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP2CTL] >> 5) & 01;
+        }
+        break;
 
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP2CTL] >> 6) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::BUSY:
+        {
+            /* Read only register */
+        }
+        break;
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::FLIP:
+        {
+            /* Read only register */
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
+        {
+            value = (memory().m_register[RPi3B::ClockRegistersAddress::CM_GP2CTL] >> 10) & (~(~0U << 2));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
+        {
+            value = memory().m_register[RPi3B::ClockRegistersAddress::CM_GP2CTL];
+        }
+        break;
+
+    
+    default:
+        break;
+    }
+
+    return(value);
 }
+
 
 void CLOCK::write(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type type ,divisor_type value) {
 
