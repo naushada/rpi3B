@@ -73,7 +73,6 @@ CLOCK::divisor_type CLOCK::get_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register 
         {
             /// SET bits 12...23 ---- Integer Divisor
             value = (memory().m_register[reg] >> 12) & (~((~0U) << 12));
-            std::printf("0x%X\n", value);
         }
         break;
 
