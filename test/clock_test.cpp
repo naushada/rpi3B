@@ -117,6 +117,15 @@ TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_Write_BOTH_Var2) {
     EXPECT_EQ(res, 10);
 }
 
+TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_clr_CM_GPnDIV_n0) {
+    clock().set_CM_GPnDIV(RPi3B::ClockRegistersAddress::CM_GP0DIV, RPi3B::ClockRegistersAddress::ClockDivisor::DIVI, 429);
+    auto value = clock().get_CM_GPnDIV(RPi3B::ClockRegistersAddress::CM_GP0DIV, RPi3B::ClockRegistersAddress::ClockDivisor::DIVI);
+    EXPECT_EQ(value, 429);
+    clock().clr_CM_GPnDIV(RPi3B::ClockRegistersAddress::CM_GP0DIV, RPi3B::ClockRegistersAddress::ClockDivisor::DIVI);
+    value = clock().get_CM_GPnDIV(RPi3B::ClockRegistersAddress::CM_GP0DIV, RPi3B::ClockRegistersAddress::ClockDivisor::DIVI);
+    EXPECT_EQ(value, 0);
+    
+}
 
 
 

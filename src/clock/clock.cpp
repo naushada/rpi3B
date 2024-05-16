@@ -40,7 +40,7 @@ void CLOCK::clr_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register reg, RPi3B::Clo
     case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            memory().m_register[reg] &= (((~(1U << 12)) << 12) |(~(1U << 12)));
+            memory().m_register[reg] &= ((~((~0U) << 24))  & (~((~0U) << 12)));
         }
         break;
 
@@ -72,7 +72,8 @@ CLOCK::divisor_type CLOCK::get_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register 
     case RPi3B::ClockRegistersAddress::ClockDivisor::DIVI:
         {
             /// SET bits 12...23 ---- Integer Divisor
-            value = (memory().m_register[reg] >> 12) & (~(1U << 12));
+            value = (memory().m_register[reg] >> 12) & (~((~0U) << 12));
+            std::printf("0x%X\n", value);
         }
         break;
 
