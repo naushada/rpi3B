@@ -127,6 +127,30 @@ TEST_F(CLOCKTest, ClockRegister_CM_GP2DIV_clr_CM_GPnDIV_n0) {
     
 }
 
+TEST_F(CLOCKTest, ClockRegister_CM_GP0CTL_clr_CM_GP0CTL_SRC) {
+    clock().set_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::SRC, 5);
+    auto value = clock().get_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::SRC);
+    EXPECT_EQ(value, 5);
+    clock().clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::SRC);
+    value = clock().get_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::SRC);
+    EXPECT_EQ(value, 0);
+    
+}
 
+TEST_F(CLOCKTest, ClockRegister_CM_GP0CTL_clr_CM_GP0CTL_MASH) {
+    clock().set_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::SRC, 6);
+    auto value = clock().get_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::SRC);
+    EXPECT_EQ(value, 6);
+    clock().set_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::MASH, 1);
+    value = clock().get_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::ALL);
+    ::printf("SRC+MASH 0x%X\n", value);
+    value = clock().get_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::MASH);
+    EXPECT_EQ(value, 1);
+    clock().clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::MASH);
+    value = clock().get_CM_GPnCTL(RPi3B::ClockRegistersAddress::CM_GP0CTL, RPi3B::ClockRegistersAddress::MASH);
+    ::printf("0x%X\n", value);
+    EXPECT_EQ(value, 0);
+    
+}
 
 #endif /*__clock_test_cpp__*/

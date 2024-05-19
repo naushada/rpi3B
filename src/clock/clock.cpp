@@ -109,13 +109,13 @@ void CLOCK::set_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::Clo
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
         {
-            memory().m_register[reg] |= ((value & 01) << 5);
+            memory().m_register[reg] |= ((value & 01) << 4);
         }
         break;
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
         {
-            memory().m_register[reg] |= ((value & 01) << 6);
+            memory().m_register[reg] |= ((value & 01) << 5);
         }
         break;
 
@@ -132,19 +132,13 @@ void CLOCK::set_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::Clo
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
         {
-            memory().m_register[reg] |= ((value & (~(~0U << 2))) << 10);
+            memory().m_register[reg] |= ((value & 0b11) << 8);
         }
         break;
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
         {
-            auto all_value = 0;
-            all_value = (~(~0U << 4)) & value | //SRC
-                        ((value & 01) << 5) | // ENAB
-                        ((value & 01) << 6) | //KILL
-                        ((value & (~(~0U << 2))) << 10); //MASH
-            memory().m_register[reg] = all_value;
-
+            memory().m_register[reg] = value;
         }
         break;
 
@@ -160,19 +154,19 @@ void CLOCK::clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::Clo
     {
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
         {
-            memory().m_register[reg] &= (~0b1111);
+            memory().m_register[reg] &= (~0b1111 << 0);
         }
         break;
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
         {
-            memory().m_register[reg] &= (~(1U << 5));
+            memory().m_register[reg] &= (~(1U << 4));
         }
         break;
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
         {
-            memory().m_register[reg] &= (~(1U << 6));
+            memory().m_register[reg] &= (~(1U << 5));
         }
         break;
 
@@ -195,7 +189,7 @@ void CLOCK::clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::Clo
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
         {
-            memory().m_register[reg] &= (~(0b1111 | (0b1 << 4) | (0b1 << 5) | (01 << 7) | (0b1 << 8) | (0b11 << 10)));
+            memory().m_register[reg] &= (~(0b1111 | (0b1 << 4) | (0b1 << 5) | (01 << 6) | (0b1 << 7) | (0b11 << 8)));
         }
         break;
 
@@ -211,19 +205,19 @@ CLOCK::control_type CLOCK::get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register 
     {
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
         {
-            value = memory().m_register[reg] & (~(~0U << 4));
+            value = memory().m_register[reg] & 0b1111;
         }
         break;
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
         {
-            value = (memory().m_register[reg] >> 5) & 01;
+            value = (memory().m_register[reg] >> 4) & 01;
         }
         break;
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
         {
-            value = (memory().m_register[reg] >> 6) & 01;
+            value = (memory().m_register[reg] >> 5) & 01;
         }
         break;
 
@@ -240,7 +234,7 @@ CLOCK::control_type CLOCK::get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register 
 
     case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
         {
-            value = (memory().m_register[reg] >> 10) & (~(~0U << 2));
+            value = (memory().m_register[reg] >> 8) & 0b11;
         }
         break;
 
