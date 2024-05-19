@@ -99,15 +99,163 @@ CLOCK::divisor_type CLOCK::get_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register 
 }
 
 void CLOCK::set_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field, divisor_type value) {
+    switch (field)
+    {
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
+        {
+            memory().m_register[reg] |= (~(~0U << 4)) & value;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
+        {
+            memory().m_register[reg] |= ((value & 01) << 5);
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
+        {
+            memory().m_register[reg] |= ((value & 01) << 6);
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::BUSY:
+        {
+            /* Read only register */
+        }
+        break;
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::FLIP:
+        {
+            /* Read only register */
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
+        {
+            memory().m_register[reg] |= ((value & (~(~0U << 2))) << 10);
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
+        {
+            auto all_value = 0;
+            all_value = (~(~0U << 4)) & value | //SRC
+                        ((value & 01) << 5) | // ENAB
+                        ((value & 01) << 6) | //KILL
+                        ((value & (~(~0U << 2))) << 10); //MASH
+            memory().m_register[reg] = all_value;
+
+        }
+        break;
+
+    
+    default:
+        break;
+    }
 
 }
 
-void CLOCK::get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field) {
+void CLOCK::clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field) {
+    switch (field)
+    {
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
+        {
+            memory().m_register[reg] &= (~((~0U) << 4));
+        }
+        break;
 
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
+        {
+            memory().m_register[reg] &= (~((~0U) << 5) |);
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
+        {
+            (memory().m_register[reg] >> 6) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::BUSY:
+        {
+            /* Read only register */
+        }
+        break;
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::FLIP:
+        {
+            /* Read only register */
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
+        {
+            (memory().m_register[reg] >> 10) & (~(~0U << 2));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
+        {
+            memory().m_register[reg];
+        }
+        break;
+
+    
+    default:
+        break;
+    }
 }
 
-CLOCK::control_type CLOCK::clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field) {
+CLOCK::control_type CLOCK::get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field) {
+    CLOCK::control_type value = 0;
+    switch (field)
+    {
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::SRC:
+        {
+            value = memory().m_register[reg] & (~(~0U << 4));
+        }
+        break;
 
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ENAB:
+        {
+            value = (memory().m_register[reg] >> 5) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::KILL:
+        {
+            value = (memory().m_register[reg] >> 6) & 01;
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::BUSY:
+        {
+            /* Read only register */
+        }
+        break;
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::FLIP:
+        {
+            /* Read only register */
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::MASH:
+        {
+            value = (memory().m_register[reg] >> 10) & (~(~0U << 2));
+        }
+        break;
+
+    case RPi3B::ClockRegistersAddress::CM_GPnCTL_Type::ALL:
+        {
+            value = memory().m_register[reg];
+        }
+        break;
+
+    
+    default:
+        break;
+    }
+
+    return(value);
 }
 
 

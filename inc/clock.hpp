@@ -24,8 +24,8 @@ class CLOCK {
         divisor_type get_CM_GPnDIV(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::ClockDivisor field);
 
         void set_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field, divisor_type value);
-        void get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field);
-        control_type clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field);
+        void clr_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field);
+        control_type get_CM_GPnCTL(RPi3B::ClockRegistersAddress::Register reg, RPi3B::ClockRegistersAddress::CM_GPnCTL_Type field);
 
 
         void CM_GP0DIV(RPi3B::ClockRegistersAddress::ClockDivisor divisor, divisor_type value);
