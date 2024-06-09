@@ -260,6 +260,10 @@ namespace RPi3B {
             return(region);
         }
 
+        device_register* operator[](Register offset) {
+            return(&m_register[offset]);
+        }
+
         /** 
          * @brief
          * address for m_register will be 
