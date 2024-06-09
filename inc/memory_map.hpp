@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <atomic>
+#include <vector>
 
 namespace RPi3B {
     struct GPIORegistersAddress {
