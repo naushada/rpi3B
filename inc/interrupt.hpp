@@ -26,6 +26,20 @@ class IVT {
         IVT() {}
         ~IVT() {}
 
+        /** 
+         * @brief Compiler give preference to this new operator over global new operator and invoke this new operator. 
+         * @param nBytes Number of bytes to be allocated
+         * @param region is the memory region to be return if present.
+         * @return pointer to void
+         */
+        void *operator new(std::size_t nBytes, void *region=nullptr) {
+            (void)nBytes;
+            if(nullptr == region) {
+                return reinterpret_cast<void *>((0x00000000U));
+            }
+            return(region);
+        }
+
         pointerToFn &operator[](Number irq) {
             return(m_IRQTable[irq]);
         }
@@ -34,24 +48,37 @@ class IVT {
         pointerToFn m_IRQTable[End];
 };
 
+class IVT_Table {
+    public:
+        IVT_Table() : m_ivt(*new IVT) {}
+        IVT_Table(auto region) : m_ivt(*new(region) IVT) {}
+
+    
+    private:
+        IVT& m_ivt;
+};
+
 class IRQ {
     public:
         using irq_number = std::uint8_t;
 
         //using IVT::IVT;
 
-        IRQ() : m_memory(*new RPi3B::InterruptRegisterAddress) {}
+        IRQ() : m_memory(*new RPi3B::InterruptRegisterAddress), m_ivt(*new IVT) {}
 
-        IRQ(auto region) : m_memory(*new(region) RPi3B::InterruptRegisterAddress) {}
+        IRQ(auto region) : m_memory(*new(region) RPi3B::InterruptRegisterAddress), m_ivt(*new (region + RPi3B::InterruptRegisterAddress::Register::IRQs_ALL_MAX) IVT) {}
 
         ~IRQ() = default;
         void enable(irq_number number);
         void disable(irq_number number);
         bool isEnabled(irq_number number);
+        void install_IRQHandler(std::uint8_t IRQNumber, IVT::pointerToFn cb);
+        void install_FIQHandler(std::uint8_t IRQNumber, IVT::pointerToFn cb);
         
 
     private:
         RPi3B::InterruptRegisterAddress& m_memory;
+        IVT& m_ivt;
 };
 
 

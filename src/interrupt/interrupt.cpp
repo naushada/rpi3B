@@ -34,8 +34,15 @@ bool IRQ::isEnabled(irq_number number) {
     }
 }
 
+void IRQ::install_IRQHandler(std::uint8_t IRQNumber, IVT::pointerToFn cb) {
+    IVT& theIVT = *reinterpret_cast<IVT*>(m_ivt[IVT::Number::Reset]);
+    theIVT[IVT::Number::IRQ] = cb;
+}
 
-
+void IRQ::install_FIQHandler(std::uint8_t IRQNumber, IVT::pointerToFn cb) {
+    IVT& theIVT = *reinterpret_cast<IVT*>(m_ivt[IVT::Number::Reset]);
+    theIVT[IVT::Number::FIQ] = cb;
+}
 
 
 
