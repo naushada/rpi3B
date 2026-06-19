@@ -272,6 +272,136 @@ namespace RPi3B {
         device_register m_register[Register::IRQs_ALL_MAX];
 
     };
+
+    /**
+     * @brief
+     *      Broadcom Serial Controller (BSC) register block — the BCM2837 I2C
+     *      master. Refer Section 3 "BSC" of BCM2837-ARM-Peripherals.pdf.
+     *      The Pi exposes BSC1 on the 40-pin header (GPIO2=SDA1, GPIO3=SCL1,
+     *      ALT0). BSC0 is at 0x3F205000, BSC1 at 0x3F804000 (bus 0x7E804000),
+     *      BSC2 (0x3F805000) is reserved for HDMI. Registers are spaced 4 bytes
+     *      apart, indexed directly by datasheet word offset (no pin mapping).
+    */
+    struct BSCRegistersAddress {
+
+        enum Register : std::uint32_t {
+            C,      /* 0x00 Control                */
+            S,      /* 0x04 Status                 */
+            DLEN,   /* 0x08 Data Length            */
+            A,      /* 0x0C Slave Address          */
+            FIFO,   /* 0x10 Data FIFO              */
+            DIV,    /* 0x14 Clock Divider          */
+            DEL,    /* 0x18 Data Delay             */
+            CLKT,   /* 0x1C Clock Stretch Timeout  */
+            BSC_MAX
+        };
+
+        /// @brief Fields of the Control register (C).
+        enum Control : std::uint32_t {
+            READ,   /* bit0     : 1=Read transfer, 0=Write transfer */
+            CLEAR,  /* bits[5:4]: write 0b01/0b10 to clear the FIFO  */
+            ST,     /* bit7     : Start a new transfer               */
+            INTD,   /* bit8     : Interrupt on DONE                  */
+            INTT,   /* bit9     : Interrupt on TX                    */
+            INTR,   /* bit10    : Interrupt on RX                    */
+            I2CEN,  /* bit15    : BSC controller enable              */
+            C_ALL
+        };
+
+        /// @brief Fields of the Status register (S). DONE/ERR/CLKT are W1C.
+        enum Status : std::uint32_t {
+            TA,     /* bit0  : Transfer Active            */
+            DONE,   /* bit1  : Transfer Done (W1C)        */
+            TXW,    /* bit2  : FIFO needs Writing         */
+            RXR,    /* bit3  : FIFO needs Reading         */
+            TXD,    /* bit4  : FIFO can accept data       */
+            RXD,    /* bit5  : FIFO contains data         */
+            TXE,    /* bit6  : FIFO empty                 */
+            RXF,    /* bit7  : FIFO full                  */
+            ERR,    /* bit8  : ACK error (W1C)            */
+            CLKT_TO,/* bit9  : Clock stretch timeout (W1C)*/
+            S_ALL
+        };
+
+        using device_register = volatile std::atomic<std::uint32_t>;
+        BSCRegistersAddress() {}
+        ~BSCRegistersAddress() {}
+
+        void *operator new(std::size_t nBytes, void *region=nullptr) {
+            (void)nBytes;
+            if(nullptr == region) {
+                /* BSC1 physical base (bus 0x7E804000 -> phys 0x3F804000). */
+                return reinterpret_cast<void *>(0x3F804000U);
+            }
+            return(region);
+        }
+
+        device_register m_register[Register::BSC_MAX];
+    };
+
+    /**
+     * @brief
+     *      SPI0 master register block. Refer Section 10 "SPI" of
+     *      BCM2837-ARM-Peripherals.pdf. SPI0 is at bus 0x7E204000 ->
+     *      phys 0x3F204000 and is exposed on GPIO7..11 (ALT0):
+     *      GPIO8=CE0, GPIO7=CE1, GPIO9=MISO, GPIO10=MOSI, GPIO11=SCLK.
+    */
+    struct SPIRegistersAddress {
+
+        enum Register : std::uint32_t {
+            CS,     /* 0x00 Control and Status     */
+            FIFO,   /* 0x04 TX/RX FIFO             */
+            CLK,    /* 0x08 Clock divider          */
+            DLEN,   /* 0x0C Data length (DMA)      */
+            LTOH,   /* 0x10 LoSSI output hold delay*/
+            DC,     /* 0x14 DMA DREQ controls      */
+            SPI_MAX
+        };
+
+        /// @brief Fields of the CS (control/status) register.
+        enum ControlStatus : std::uint32_t {
+            CS_LINE,  /* bits[1:0] : Chip Select (which CE line)            */
+            CPHA,     /* bit2      : Clock Phase                            */
+            CPOL,     /* bit3      : Clock Polarity                         */
+            CLEAR,    /* bits[5:4] : Clear TX (0b01) / RX (0b10) FIFO       */
+            CSPOL,    /* bit6      : Chip Select Polarity                   */
+            TA,       /* bit7      : Transfer Active                        */
+            DMAEN,    /* bit8      : DMA enable                             */
+            INTD,     /* bit9      : Interrupt on DONE                      */
+            INTR,     /* bit10     : Interrupt on RXR                       */
+            ADCS,     /* bit11     : Auto Deassert Chip Select (DMA)        */
+            REN,      /* bit12     : Read Enable (bidirectional mode)       */
+            LEN,      /* bit13     : LoSSI enable                           */
+            LMONO,    /* bit14     : unused (LoSSI)                         */
+            TE_EN,    /* bit15     : unused                                 */
+            DONE,     /* bit16     : Transfer Done (RO)                     */
+            RXD,      /* bit17     : RX FIFO contains data (RO)             */
+            TXD,      /* bit18     : TX FIFO can accept data (RO)           */
+            RXR,      /* bit19     : RX FIFO needs Reading (RO)             */
+            RXF,      /* bit20     : RX FIFO full (RO)                      */
+            CSPOL0,   /* bit21     : Chip Select 0 Polarity                 */
+            CSPOL1,   /* bit22     : Chip Select 1 Polarity                 */
+            CSPOL2,   /* bit23     : Chip Select 2 Polarity                 */
+            DMA_LEN,  /* bit24     : Enable DMA in LoSSI mode               */
+            LEN_LONG, /* bit25     : Enable Long data word in LoSSI DMA     */
+            CS_ALL
+        };
+
+        using device_register = volatile std::atomic<std::uint32_t>;
+        SPIRegistersAddress() {}
+        ~SPIRegistersAddress() {}
+
+        void *operator new(std::size_t nBytes, void *region=nullptr) {
+            (void)nBytes;
+            if(nullptr == region) {
+                /* SPI0 physical base (bus 0x7E204000 -> phys 0x3F204000). */
+                return reinterpret_cast<void *>(0x3F204000U);
+            }
+            return(region);
+        }
+
+        device_register m_register[Register::SPI_MAX];
+    };
 }
 
 
