@@ -15,7 +15,8 @@ class CLOCK {
 
         CLOCK() : m_memory(*new RPi3B::ClockRegistersAddress) {}
 
-        CLOCK(auto region) : m_memory(*new(region) RPi3B::ClockRegistersAddress) {}
+        template<typename Region>
+        CLOCK(Region region) : m_memory(*new(region) RPi3B::ClockRegistersAddress) {}
 
         ~CLOCK() = default;
 

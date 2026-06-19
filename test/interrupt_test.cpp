@@ -36,6 +36,33 @@ TEST_F(IRQTest, Irq) {
     //::printf("0x%X\n", &irq()[IVT::SWI]);
 }
 
+/* --- Regression tests for the fixes in docs/DRIVER_REVIEW.md §2.4 --- */
+
+TEST_F(IRQTest, Enable_Below32_Uses_Bank1_And_IsEnabled) {
+    irq().enable(20);
+    EXPECT_TRUE(irq().isEnabled(20));
+    EXPECT_FALSE(irq().isEnabled(21));
+}
+
+TEST_F(IRQTest, Enable_AtOrAbove32_Uses_Bank2) {
+    /* IRQ 53 == i2c_int (see table above): bank2, bit 21. */
+    irq().enable(53);
+    EXPECT_TRUE(irq().isEnabled(53));
+    EXPECT_FALSE(irq().isEnabled(20)); /* a different bank stays clear */
+}
+
+TEST_F(IRQTest, Disable_Sets_Disable_Register) {
+    irq().disable(54); /* spi_int */
+    EXPECT_TRUE(irq().isEnabled(54) == false); /* not enabled; nothing in enable reg */
+}
+
+TEST_F(IRQTest, Install_Handlers_Does_Not_Crash) {
+    /* Previously dereferenced a wild pointer; must now be a safe assignment. */
+    irq().install_IRQHandler(53, []{});
+    irq().install_FIQHandler(54, []{});
+    SUCCEED();
+}
+
 
 
 

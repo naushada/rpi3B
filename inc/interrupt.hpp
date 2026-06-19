@@ -51,7 +51,8 @@ class IVT {
 class IVT_Table {
     public:
         IVT_Table() : m_ivt(*new IVT) {}
-        IVT_Table(auto region) : m_ivt(*new(region) IVT) {}
+        template<typename Region>
+        IVT_Table(Region region) : m_ivt(*new(region) IVT) {}
 
     
     private:
@@ -66,7 +67,8 @@ class IRQ {
 
         IRQ() : m_memory(*new RPi3B::InterruptRegisterAddress), m_ivt(*new IVT) {}
 
-        IRQ(auto region) : m_memory(*new(region) RPi3B::InterruptRegisterAddress), m_ivt(*new (region + RPi3B::InterruptRegisterAddress::Register::IRQs_ALL_MAX) IVT) {}
+        template<typename Region>
+        IRQ(Region region) : m_memory(*new(region) RPi3B::InterruptRegisterAddress), m_ivt(*new (region + RPi3B::InterruptRegisterAddress::Register::IRQs_ALL_MAX) IVT) {}
 
         ~IRQ() = default;
         void enable(irq_number number);

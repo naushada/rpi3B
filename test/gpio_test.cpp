@@ -392,4 +392,46 @@ TEST_F(GPIOTest, GPIO_Number_14_InputMode) {
     EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::InputMode);
 }
 
+/* --- Regression tests for the fixes in docs/DRIVER_REVIEW.md §2.2 --- */
+
+TEST_F(GPIOTest, Output_Clears_Stale_AlternateFunction) {
+    /* output() must clear the 3-bit FSEL field, not OR bit0 into a stale value. */
+    GPIO::gpio_number gpio_n = 12;
+    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction0); // 0b100
+    gpio().output(gpio_n);
+    EXPECT_EQ(gpio().read(gpio_n), RPi3B::GPIORegistersAddress::Config::OutputMode); // 0b001
+}
+
+TEST_F(GPIOTest, Input_Clears_Field_And_Is_Readable) {
+    GPIO::gpio_number gpio_n = 7;
+    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction3);
+    gpio().input(gpio_n);
+    EXPECT_EQ(gpio().read(gpio_n), RPi3B::GPIORegistersAddress::Config::InputMode); // 0b000
+}
+
+TEST_F(GPIOTest, FSEL_Indexed_By_BCM_GPIO_Number) {
+    /* GPIO 10 is the first field of GPFSEL1, regardless of header pin. */
+    gpio().write(10, RPi3B::GPIORegistersAddress::Config::OutputMode);
+    auto reg = gpio().memory().m_register[RPi3B::GPIORegistersAddress::Register::BCM2837_GPFSEL1].load();
+    EXPECT_EQ(reg & 0b111, RPi3B::GPIORegistersAddress::Config::OutputMode);
+}
+
+TEST_F(GPIOTest, GPSETn_Below32_Does_Not_Touch_Bank1) {
+    gpio().GPSETn(20);
+    EXPECT_EQ(gpio().GPGETn(20), 1U);
+    EXPECT_EQ(gpio().memory().m_register[RPi3B::GPIORegistersAddress::Register::BCM2837_GPSET1].load(), 0U);
+}
+
+TEST_F(GPIOTest, GPSETn_AtOrAbove32_Targets_Bank1) {
+    gpio().GPSETn(40);
+    EXPECT_EQ(gpio().GPGETn(40), 1U);
+    auto reg = gpio().memory().m_register[RPi3B::GPIORegistersAddress::Register::BCM2837_GPSET1].load();
+    EXPECT_EQ((reg >> 8) & 1U, 1U); /* gpio 40 -> bank1 bit 8 */
+}
+
+TEST_F(GPIOTest, Out_Of_Range_GPIO_Is_NoOp) {
+    EXPECT_EQ(gpio().read(99), 0U);
+    EXPECT_EQ(gpio().GPGETn(99), 0U);
+}
+
 #endif /*__gpio_test_cpp__*/

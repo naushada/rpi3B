@@ -14,7 +14,8 @@ class GPIO {
 
         GPIO() : m_memory(*new RPi3B::GPIORegistersAddress) {}
 
-        GPIO(auto region) : m_memory(*new(region) RPi3B::GPIORegistersAddress) {}
+        template<typename Region>
+        GPIO(Region region) : m_memory(*new(region) RPi3B::GPIORegistersAddress) {}
 
         ~GPIO() = default;
 
