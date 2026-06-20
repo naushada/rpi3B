@@ -213,3 +213,11 @@ The I2C (BSC1) and SPI0 drivers (`inc/i2c.hpp`, `inc/spi.hpp`, `src/i2c`,
 > Note: like the existing drivers these are **host-side bit-layout models**; real
 > transfers additionally need correct GPIO ALT0 muxing, clock divider setup, and
 > the build/toolchain fixes in 2.1 before they run on a Pi.
+
+The shipped `Bcm2837I2cTransport` (`inc/i2c_bus.hpp`) is **poll-based** (bounded
+spin on the status register). The **interrupt-driven** bare-metal variant
+`Bcm2837I2cIrqTransport` (`inc/i2c_irq.hpp` + `src/i2c/i2c_irq.cpp`) is
+**implemented** (DONE/TXW/RXR-driven, watchdog, async) and host-tested; see
+[`i2c-irq-transport-spec.md`](i2c-irq-transport-spec.md) — on-silicon validation
+(P4) is the only open item. On Linux the interrupt-driven path is already
+provided by the kernel via `inc/i2c_dev.hpp` (`/dev/i2c-1`).
