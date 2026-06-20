@@ -14,17 +14,17 @@
 */
 void IRQ::enable(irq_number irqNumber) {
     if(irqNumber < 32) {
-        m_memory.m_register[RPi3B::InterruptRegisterAddress::Register::Enable_IRQs_1] |= (1U << irqNumber);
+        m_memory.m_register[BCM2837::InterruptRegisterAddress::Register::Enable_IRQs_1] |= (1U << irqNumber);
     } else {
-        m_memory.m_register[RPi3B::InterruptRegisterAddress::Register::Enable_IRQs_2] |= (1U << (irqNumber - 32));
+        m_memory.m_register[BCM2837::InterruptRegisterAddress::Register::Enable_IRQs_2] |= (1U << (irqNumber - 32));
     }
 }
 
 void IRQ::disable(irq_number irqNumber) {
     if(irqNumber < 32) {
-        m_memory.m_register[RPi3B::InterruptRegisterAddress::Register::Disable_IRQs_1] |= (1U << irqNumber);
+        m_memory.m_register[BCM2837::InterruptRegisterAddress::Register::Disable_IRQs_1] |= (1U << irqNumber);
     } else {
-        m_memory.m_register[RPi3B::InterruptRegisterAddress::Register::Disable_IRQs_2] |= (1U << (irqNumber - 32));
+        m_memory.m_register[BCM2837::InterruptRegisterAddress::Register::Disable_IRQs_2] |= (1U << (irqNumber - 32));
     }
 }
 
@@ -36,9 +36,9 @@ void IRQ::disable(irq_number irqNumber) {
 */
 bool IRQ::isEnabled(irq_number number) {
     if(number < 32) {
-        return(((m_memory.m_register[RPi3B::InterruptRegisterAddress::Register::Enable_IRQs_1] >> number) & 1U) == 1U);
+        return(((m_memory.m_register[BCM2837::InterruptRegisterAddress::Register::Enable_IRQs_1] >> number) & 1U) == 1U);
     }
-    return(((m_memory.m_register[RPi3B::InterruptRegisterAddress::Register::Enable_IRQs_2] >> (number - 32)) & 1U) == 1U);
+    return(((m_memory.m_register[BCM2837::InterruptRegisterAddress::Register::Enable_IRQs_2] >> (number - 32)) & 1U) == 1U);
 }
 
 /**

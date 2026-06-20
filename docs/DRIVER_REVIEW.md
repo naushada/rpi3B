@@ -8,8 +8,8 @@ same framework while avoiding the bugs listed here.
 **Status (current):** The **GPIO** and **Interrupt** defects (§2.2, §2.4) are
 **fixed and merged** (PR #1), with regression tests. **I2C (BSC1)** and **SPI0**
 are **implemented and shipped** (§3). The build is now library-consumable
-(`rpi3b_driver` static lib) and the repo is vendored into the `iot` Yocto image
-as the `iot-rpi3b-selftest` boot oneshot. The **Clock** defects (§2.3) and the
+(`bcm2837_driver` static lib) and the repo is vendored into the `iot` Yocto image
+as the `iot-bcm2837-selftest` boot oneshot. The **Clock** defects (§2.3) and the
 remaining design notes in §2.1 are **still open**.
 
 ---
@@ -49,8 +49,8 @@ Each peripheral has a POD-like struct, e.g. `GPIORegistersAddress`, containing:
 Holds a **reference** to the register block, bound in the constructor:
 
 ```cpp
-GPIO()              : m_memory(*new RPi3B::GPIORegistersAddress) {}     // hardware
-GPIO(auto region)   : m_memory(*new(region) RPi3B::GPIORegistersAddress) {}  // test
+GPIO()              : m_memory(*new BCM2837::GPIORegistersAddress) {}     // hardware
+GPIO(auto region)   : m_memory(*new(region) BCM2837::GPIORegistersAddress) {}  // test
 ```
 
 Methods read/modify/write fields of `m_memory.m_register[...]`.
@@ -62,8 +62,8 @@ register reads/writes hit the vector instead of real MMIO. Tests therefore only
 verify the **bit-layout arithmetic**, not real hardware behaviour.
 
 ### 1.4 Build
-- Root `CMakeLists.txt` builds the `rpi3Bdriver` executable as a **hosted** binary.
-- `test/CMakeLists.txt` builds `rpi3B_test` and explicitly lists the peripheral
+- Root `CMakeLists.txt` builds the `bcm2837_demo` executable as a **hosted** binary.
+- `test/CMakeLists.txt` builds `bcm2837_test` and explicitly lists the peripheral
   `.cpp` files plus GoogleTest.
 
 ---
@@ -79,7 +79,7 @@ bug / inconsistency · **[L]** cosmetic / warning.
   live in `src/gpio/`, `src/clock/`, `src/interrupt/` — so only `src/main.cpp`
   was compiled and the project never actually built the drivers (it also failed
   under `-std=c++17` on the headers' abbreviated-template ctors). Resolved by the
-  CMake refactor: a `rpi3b_driver` STATIC library globs `src/*/*.cpp`, builds as
+  CMake refactor: a `bcm2837_driver` STATIC library globs `src/*/*.cpp`, builds as
   C++20, and the public headers are kept C++17-consumable (explicit-template
   ctors) so the C++17 `iot` build can link it.
 - **[H] No freestanding/cross toolchain.** The project compiles as a normal host
@@ -92,7 +92,7 @@ bug / inconsistency · **[L]** cosmetic / warning.
   added no value over the peripheral bus, and—worse for the real-hardware
   path—C++20's `std::atomic` default constructor value-initialises to 0, so
   placement-new'ing a register block over live MMIO would **zero every
-  register**. `device_register` is now `RPi3B::mmio_reg`, a trivially
+  register**. `device_register` is now `BCM2837::mmio_reg`, a trivially
   default-constructible `volatile uint32_t` wrapper whose compound operators do
   an explicit volatile load/modify/store (no `-Wdeprecated-volatile`). This lets
   `inc/mmio.hpp` overlay live registers via `/dev/mem` without clobbering them.

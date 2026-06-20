@@ -65,10 +65,10 @@ class IRQ {
 
         //using IVT::IVT;
 
-        IRQ() : m_memory(*new RPi3B::InterruptRegisterAddress), m_ivt(*new IVT) {}
+        IRQ() : m_memory(*new BCM2837::InterruptRegisterAddress), m_ivt(*new IVT) {}
 
         template<typename Region>
-        IRQ(Region region) : m_memory(*new(region) RPi3B::InterruptRegisterAddress), m_ivt(*new (region + RPi3B::InterruptRegisterAddress::Register::IRQs_ALL_MAX) IVT) {}
+        IRQ(Region region) : m_memory(*new(region) BCM2837::InterruptRegisterAddress), m_ivt(*new (region + BCM2837::InterruptRegisterAddress::Register::IRQs_ALL_MAX) IVT) {}
 
         ~IRQ() = default;
         void enable(irq_number number);
@@ -79,7 +79,7 @@ class IRQ {
         
 
     private:
-        RPi3B::InterruptRegisterAddress& m_memory;
+        BCM2837::InterruptRegisterAddress& m_memory;
         IVT& m_ivt;
 };
 

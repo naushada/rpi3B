@@ -21,19 +21,19 @@ class I2C {
     public:
         using value_type = std::uint32_t;
 
-        I2C() : m_memory(*new RPi3B::BSCRegistersAddress) {}
+        I2C() : m_memory(*new BCM2837::BSCRegistersAddress) {}
         template<typename Region>
-        I2C(Region region) : m_memory(*new(region) RPi3B::BSCRegistersAddress) {}
+        I2C(Region region) : m_memory(*new(region) BCM2837::BSCRegistersAddress) {}
         ~I2C() = default;
 
         /* ---- Control register (C) field access ---- */
-        void set_control(RPi3B::BSCRegistersAddress::Control field, value_type value);
-        void clr_control(RPi3B::BSCRegistersAddress::Control field);
-        value_type get_control(RPi3B::BSCRegistersAddress::Control field) const;
+        void set_control(BCM2837::BSCRegistersAddress::Control field, value_type value);
+        void clr_control(BCM2837::BSCRegistersAddress::Control field);
+        value_type get_control(BCM2837::BSCRegistersAddress::Control field) const;
 
         /* ---- Status register (S) field access (DONE/ERR/CLKT are W1C) ---- */
-        void clr_status(RPi3B::BSCRegistersAddress::Status field);
-        value_type get_status(RPi3B::BSCRegistersAddress::Status field) const;
+        void clr_status(BCM2837::BSCRegistersAddress::Status field);
+        value_type get_status(BCM2837::BSCRegistersAddress::Status field) const;
 
         /* ---- High level helpers ---- */
         /// @brief Enable/disable the BSC controller (C.I2CEN).
@@ -57,12 +57,12 @@ class I2C {
         void write_byte(value_type byte);
         value_type read_byte() const;
 
-        RPi3B::BSCRegistersAddress& memory() const {
+        BCM2837::BSCRegistersAddress& memory() const {
             return(m_memory);
         }
 
     private:
-        RPi3B::BSCRegistersAddress& m_memory;
+        BCM2837::BSCRegistersAddress& m_memory;
 };
 
 #endif /*__i2c_hpp__*/

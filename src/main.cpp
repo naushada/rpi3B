@@ -17,7 +17,7 @@ std::int32_t main(int argc, char** argv) {
 
     if(argc > 1 && std::strcmp(argv[1], "--blink") == 0) {
         try {
-            auto gpio = RPi3B::map_gpio();          // root, /dev/mem
+            auto gpio = BCM2837::map_gpio();          // root, /dev/mem
             const GPIO::gpio_number led = 17;
             gpio->output(led);
             gpio->GPSETn(led);                      // drive high
@@ -30,7 +30,7 @@ std::int32_t main(int argc, char** argv) {
     }
 
     std::printf(
-        "rpi3B driver demo\n"
+        "bcm2837 driver demo\n"
         "  %s --blink   map GPIO via /dev/mem and drive GPIO17 high (Pi, root)\n"
         "  See inc/mmio.hpp / README.md for the full real-MMIO API.\n",
         argv[0]);

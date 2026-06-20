@@ -13,7 +13,7 @@ class I2CTest : public ::testing::Test
          * @brief Memory region for the I2C instance is taken from
          *        m_memory_region so register access hits the buffer, not MMIO.
         */
-        I2CTest() : m_memory_region(RPi3B::BSCRegistersAddress::Register::BSC_MAX),
+        I2CTest() : m_memory_region(BCM2837::BSCRegistersAddress::Register::BSC_MAX),
                     m_i2c(I2C(m_memory_region.data())) {}
         virtual ~I2CTest() override = default;
 

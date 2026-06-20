@@ -3,13 +3,13 @@
 
 /**
  * @brief
- *      Linux real-hardware backing for the rpi3B drivers. Maps a BCM2837
+ *      Linux real-hardware backing for the bcm2837 drivers. Maps a BCM2837
  *      peripheral register block into the process through /dev/mem and hands the
  *      resulting virtual pointer to a driver's region constructor — the same
  *      seam the unit tests use, except the buffer is live MMIO instead of a
  *      std::vector.
  *
- *      This works because RPi3B::mmio_reg is trivially default-constructible:
+ *      This works because BCM2837::mmio_reg is trivially default-constructible:
  *      placement-new'ing the register block over the mapping does not run any
  *      element constructor, so the live registers are *overlaid*, not zeroed
  *      (see memory_map.hpp / docs/DRIVER_REVIEW.md §2.1).
@@ -42,7 +42,7 @@
 #include "spi.hpp"
 // interrupt.hpp is intentionally NOT mapped here — see the IRQ note below.
 
-namespace RPi3B {
+namespace BCM2837 {
 
     /// @brief BCM2837 (Pi 2/3) peripheral physical bases. Datasheet bus
     ///        addresses 0x7Ennnnnn map to physical 0x3Fnnnnnn.
@@ -64,7 +64,7 @@ namespace RPi3B {
             MMIO(std::uintptr_t phys, std::size_t length, const char* dev = "/dev/mem") {
                 m_fd = ::open(dev, O_RDWR | O_SYNC | O_CLOEXEC);
                 if(m_fd < 0) {
-                    throw std::runtime_error(std::string("rpi3B MMIO: open(") + dev + ") failed");
+                    throw std::runtime_error(std::string("bcm2837 MMIO: open(") + dev + ") failed");
                 }
                 const std::uintptr_t pg = static_cast<std::uintptr_t>(::sysconf(_SC_PAGESIZE));
                 const std::uintptr_t page_base = phys & ~(pg - 1U);
@@ -75,7 +75,7 @@ namespace RPi3B {
                 if(m_map == MAP_FAILED) {
                     ::close(m_fd);
                     m_fd = -1;
-                    throw std::runtime_error("rpi3B MMIO: mmap failed");
+                    throw std::runtime_error("bcm2837 MMIO: mmap failed");
                 }
             }
 
@@ -114,7 +114,7 @@ namespace RPi3B {
      * m_io.get(). Non-copyable; usable by value via guaranteed copy elision
      * (the map_* factories return a prvalue).
      *
-     *   auto gpio = RPi3B::map_gpio();   // root via /dev/mem
+     *   auto gpio = BCM2837::map_gpio();   // root via /dev/mem
      *   gpio->output(17);
      *   gpio->GPSETn(17);
     */
@@ -154,6 +154,6 @@ namespace RPi3B {
         return Mapped<GPIO>(0, sizeof(GPIORegistersAddress), "/dev/gpiomem");
     }
 
-} // namespace RPi3B
+} // namespace BCM2837
 
 #endif /* __mmio_hpp__ */

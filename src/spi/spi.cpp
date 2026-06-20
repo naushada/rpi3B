@@ -7,8 +7,8 @@ namespace {
     struct field { std::uint32_t shift; std::uint32_t width; };
 
     /// @brief Bit position/width of each CS register field.
-    field cs_field(RPi3B::SPIRegistersAddress::ControlStatus f) {
-        using CS = RPi3B::SPIRegistersAddress::ControlStatus;
+    field cs_field(BCM2837::SPIRegistersAddress::ControlStatus f) {
+        using CS = BCM2837::SPIRegistersAddress::ControlStatus;
         switch (f) {
             case CS::CS_LINE:  return {0,  2};
             case CS::CPHA:     return {2,  1};
@@ -41,75 +41,75 @@ namespace {
     std::uint32_t mask(std::uint32_t w) { return (w >= 32) ? ~0U : ~((~0U) << w); }
 }
 
-void SPI::set_cs(RPi3B::SPIRegistersAddress::ControlStatus f, value_type value) {
+void SPI::set_cs(BCM2837::SPIRegistersAddress::ControlStatus f, value_type value) {
     auto fld = cs_field(f);
     /* clear the field first, then OR in the (masked) value -- read/modify/write */
-    memory().m_register[RPi3B::SPIRegistersAddress::Register::CS] &= ~(mask(fld.width) << fld.shift);
-    memory().m_register[RPi3B::SPIRegistersAddress::Register::CS] |= ((value & mask(fld.width)) << fld.shift);
+    memory().m_register[BCM2837::SPIRegistersAddress::Register::CS] &= ~(mask(fld.width) << fld.shift);
+    memory().m_register[BCM2837::SPIRegistersAddress::Register::CS] |= ((value & mask(fld.width)) << fld.shift);
 }
 
-void SPI::clr_cs(RPi3B::SPIRegistersAddress::ControlStatus f) {
+void SPI::clr_cs(BCM2837::SPIRegistersAddress::ControlStatus f) {
     auto fld = cs_field(f);
-    memory().m_register[RPi3B::SPIRegistersAddress::Register::CS] &= ~(mask(fld.width) << fld.shift);
+    memory().m_register[BCM2837::SPIRegistersAddress::Register::CS] &= ~(mask(fld.width) << fld.shift);
 }
 
-SPI::value_type SPI::get_cs(RPi3B::SPIRegistersAddress::ControlStatus f) const {
+SPI::value_type SPI::get_cs(BCM2837::SPIRegistersAddress::ControlStatus f) const {
     auto fld = cs_field(f);
-    return (memory().m_register[RPi3B::SPIRegistersAddress::Register::CS] >> fld.shift) & mask(fld.width);
+    return (memory().m_register[BCM2837::SPIRegistersAddress::Register::CS] >> fld.shift) & mask(fld.width);
 }
 
 void SPI::mode(value_type cpol, value_type cpha) {
-    set_cs(RPi3B::SPIRegistersAddress::ControlStatus::CPOL, cpol);
-    set_cs(RPi3B::SPIRegistersAddress::ControlStatus::CPHA, cpha);
+    set_cs(BCM2837::SPIRegistersAddress::ControlStatus::CPOL, cpol);
+    set_cs(BCM2837::SPIRegistersAddress::ControlStatus::CPHA, cpha);
 }
 
 void SPI::chip_select(value_type ce) {
-    set_cs(RPi3B::SPIRegistersAddress::ControlStatus::CS_LINE, ce);
+    set_cs(BCM2837::SPIRegistersAddress::ControlStatus::CS_LINE, ce);
 }
 
 SPI::value_type SPI::chip_select() const {
-    return get_cs(RPi3B::SPIRegistersAddress::ControlStatus::CS_LINE);
+    return get_cs(BCM2837::SPIRegistersAddress::ControlStatus::CS_LINE);
 }
 
 void SPI::clock_divider(value_type divider) {
     /* CLK is a 16-bit divider; SCLK = core_clock / divider. */
-    memory().m_register[RPi3B::SPIRegistersAddress::Register::CLK] = (divider & 0xFFFFU);
+    memory().m_register[BCM2837::SPIRegistersAddress::Register::CLK] = (divider & 0xFFFFU);
 }
 
 SPI::value_type SPI::clock_divider() const {
-    return memory().m_register[RPi3B::SPIRegistersAddress::Register::CLK] & 0xFFFFU;
+    return memory().m_register[BCM2837::SPIRegistersAddress::Register::CLK] & 0xFFFFU;
 }
 
 void SPI::clear_fifo() {
-    set_cs(RPi3B::SPIRegistersAddress::ControlStatus::CLEAR, 0b11);
+    set_cs(BCM2837::SPIRegistersAddress::ControlStatus::CLEAR, 0b11);
 }
 
 void SPI::begin_transfer() {
-    set_cs(RPi3B::SPIRegistersAddress::ControlStatus::TA, 1);
+    set_cs(BCM2837::SPIRegistersAddress::ControlStatus::TA, 1);
 }
 
 void SPI::end_transfer() {
-    clr_cs(RPi3B::SPIRegistersAddress::ControlStatus::TA);
+    clr_cs(BCM2837::SPIRegistersAddress::ControlStatus::TA);
 }
 
 void SPI::write_byte(value_type byte) {
-    memory().m_register[RPi3B::SPIRegistersAddress::Register::FIFO] = (byte & 0xFFU);
+    memory().m_register[BCM2837::SPIRegistersAddress::Register::FIFO] = (byte & 0xFFU);
 }
 
 SPI::value_type SPI::read_byte() const {
-    return memory().m_register[RPi3B::SPIRegistersAddress::Register::FIFO] & 0xFFU;
+    return memory().m_register[BCM2837::SPIRegistersAddress::Register::FIFO] & 0xFFU;
 }
 
 bool SPI::is_done() const {
-    return get_cs(RPi3B::SPIRegistersAddress::ControlStatus::DONE) == 1U;
+    return get_cs(BCM2837::SPIRegistersAddress::ControlStatus::DONE) == 1U;
 }
 
 bool SPI::can_write() const {
-    return get_cs(RPi3B::SPIRegistersAddress::ControlStatus::TXD) == 1U;
+    return get_cs(BCM2837::SPIRegistersAddress::ControlStatus::TXD) == 1U;
 }
 
 bool SPI::can_read() const {
-    return get_cs(RPi3B::SPIRegistersAddress::ControlStatus::RXD) == 1U;
+    return get_cs(BCM2837::SPIRegistersAddress::ControlStatus::RXD) == 1U;
 }
 
 #endif /*__spi_cpp__*/

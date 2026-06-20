@@ -28,7 +28,7 @@ The placement-`new` trick lets the **same code** run two ways:
 GPIO gpio;                         // hardware: registers overlay MMIO at 0x3F200000
                                    // (real Pi only — see "Status" below)
 
-std::vector<std::uint32_t> buf(RPi3B::GPIORegistersAddress::BCM2837_MAX);
+std::vector<std::uint32_t> buf(BCM2837::GPIORegistersAddress::BCM2837_MAX);
 GPIO gpio(buf.data());             // test/host: registers overlay a heap buffer
 ```
 
@@ -52,18 +52,18 @@ Targets / options:
 
 | Target / option | Default | Purpose |
 |-----------------|---------|---------|
-| `rpi3b_driver` (alias `rpi3b::driver`) | always | STATIC driver library (`src/*/*.cpp`). |
-| `rpi3Bdriver` | top-level only | Standalone demo executable (`src/main.cpp`). |
-| `rpi3B_test` | top-level only | GoogleTest suite. |
-| `-DRPI3B_BUILD_APP=ON/OFF` | top-level | Build the demo executable. |
-| `-DRPI3B_BUILD_TESTS=ON/OFF` | top-level | Build + register the gtest suite. |
+| `bcm2837_driver` (alias `bcm2837::driver`) | always | STATIC driver library (`src/*/*.cpp`). |
+| `bcm2837_demo` | top-level only | Standalone demo executable (`src/main.cpp`). |
+| `bcm2837_test` | top-level only | GoogleTest suite. |
+| `-DBCM2837_BUILD_APP=ON/OFF` | top-level | Build the demo executable. |
+| `-DBCM2837_BUILD_TESTS=ON/OFF` | top-level | Build + register the gtest suite. |
 
-When pulled in via `add_subdirectory(...)`, only `rpi3b_driver` is built by
+When pulled in via `add_subdirectory(...)`, only `bcm2837_driver` is built by
 default (app/tests off), so a parent project just links the library:
 
 ```cmake
-add_subdirectory(rpi3B)
-target_link_libraries(my_app PRIVATE rpi3b_driver)   # headers come transitively
+add_subdirectory(bcm2837)
+target_link_libraries(my_app PRIVATE bcm2837_driver)   # headers come transitively
 ```
 
 The public headers are C++17-consumable (the `auto`-param ctors are written as
@@ -72,9 +72,9 @@ explicit templates), so a C++17 parent can link the C++20-built library.
 ### Tests
 
 ```bash
-cmake -S . -B build -DRPI3B_BUILD_TESTS=ON
+cmake -S . -B build -DBCM2837_BUILD_TESTS=ON
 cmake --build build
-ctest --test-dir build            # or: ./build/test/rpi3B_test
+ctest --test-dir build            # or: ./build/test/bcm2837_test
 ```
 
 Tests construct each driver over a `std::vector<uint32_t>` and assert the
@@ -122,7 +122,7 @@ virtual pointer to the same region constructor the tests use:
 ```cpp
 #include "mmio.hpp"
 
-auto gpio = RPi3B::map_gpio();   // maps the GPIO block via /dev/mem (root)
+auto gpio = BCM2837::map_gpio();   // maps the GPIO block via /dev/mem (root)
 gpio->output(17);
 gpio->GPSETn(17);                // drive GPIO17 high
 ```
@@ -131,9 +131,9 @@ gpio->GPSETn(17);                // drive GPIO17 high
 root / `CAP_SYS_RAWIO`); `map_gpiomem()` maps **GPIO only** via the unprivileged
 `/dev/gpiomem` (group `gpio`). Each returns an RAII `Mapped<Driver>` that owns
 the mapping and unmaps on scope exit. The demo binary does this under
-`rpi3Bdriver --blink`.
+`bcm2837_demo --blink`.
 
-This is safe because `RPi3B::mmio_reg` (the register cell type) is *trivially
+This is safe because `BCM2837::mmio_reg` (the register cell type) is *trivially
 default-constructible*: placement-new'ing a register block over live MMIO
 **overlays** the registers instead of zeroing them. `IRQ` is **not** exposed
 here — its IVT/exception-vector model is bare-metal-only, not a Linux userspace
@@ -151,7 +151,7 @@ writes.
 ## Use in the iot Yocto image
 
 This repo is vendored into [`naushada/iot`](https://github.com/naushada/iot)
-under `modules/rpi3B` and built as the `rpi3b_driver` library. Its
-gtest suite ships as the **`iot-rpi3b-selftest`** systemd oneshot, which runs the
+under `modules/bcm2837` and built as the `bcm2837_driver` library. Its
+gtest suite ships as the **`iot-bcm2837-selftest`** systemd oneshot, which runs the
 bit-layout suite once at boot and records pass/fail in the journal (gated by the
-recipe's `rpi3b-selftest` PACKAGECONFIG).
+recipe's `bcm2837-selftest` PACKAGECONFIG).

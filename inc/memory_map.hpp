@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace RPi3B {
+namespace BCM2837 {
 
     /**
      * @brief One 32-bit memory-mapped I/O register.
@@ -113,7 +113,7 @@ namespace RPi3B {
             BCM2837_MAX
         };
     
-        using device_register = mmio_reg; //@brief One MMIO register (see RPi3B::mmio_reg)
+        using device_register = mmio_reg; //@brief One MMIO register (see BCM2837::mmio_reg)
         GPIORegistersAddress() {}
         ~GPIORegistersAddress() {}
 
@@ -223,7 +223,7 @@ namespace RPi3B {
             BOTH_VALUE
         };
 
-        using device_register = mmio_reg; //@brief One MMIO register (see RPi3B::mmio_reg)
+        using device_register = mmio_reg; //@brief One MMIO register (see BCM2837::mmio_reg)
         ClockRegistersAddress() {
             /*
             for(auto idx = 0; idx < Register::CM_GPn_MAX; ++idx)
@@ -271,7 +271,7 @@ namespace RPi3B {
         };
 
         
-        using device_register = mmio_reg; //@brief One MMIO register (see RPi3B::mmio_reg)
+        using device_register = mmio_reg; //@brief One MMIO register (see BCM2837::mmio_reg)
         InterruptRegisterAddress() {
             for(auto idx = 0; idx < Register::IRQs_ALL_MAX; ++idx)
                 std::printf("Interrupt Register is 0x%X\n", &m_register[idx]);

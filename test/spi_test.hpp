@@ -13,7 +13,7 @@ class SPITest : public ::testing::Test
          * @brief Memory region for the SPI instance is taken from
          *        m_memory_region so register access hits the buffer, not MMIO.
         */
-        SPITest() : m_memory_region(RPi3B::SPIRegistersAddress::Register::SPI_MAX),
+        SPITest() : m_memory_region(BCM2837::SPIRegistersAddress::Register::SPI_MAX),
                     m_spi(SPI(m_memory_region.data())) {}
         virtual ~SPITest() override = default;
 

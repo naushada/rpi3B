@@ -21,15 +21,15 @@ class SPI {
     public:
         using value_type = std::uint32_t;
 
-        SPI() : m_memory(*new RPi3B::SPIRegistersAddress) {}
+        SPI() : m_memory(*new BCM2837::SPIRegistersAddress) {}
         template<typename Region>
-        SPI(Region region) : m_memory(*new(region) RPi3B::SPIRegistersAddress) {}
+        SPI(Region region) : m_memory(*new(region) BCM2837::SPIRegistersAddress) {}
         ~SPI() = default;
 
         /* ---- CS (control/status) field access ---- */
-        void set_cs(RPi3B::SPIRegistersAddress::ControlStatus field, value_type value);
-        void clr_cs(RPi3B::SPIRegistersAddress::ControlStatus field);
-        value_type get_cs(RPi3B::SPIRegistersAddress::ControlStatus field) const;
+        void set_cs(BCM2837::SPIRegistersAddress::ControlStatus field, value_type value);
+        void clr_cs(BCM2837::SPIRegistersAddress::ControlStatus field);
+        value_type get_cs(BCM2837::SPIRegistersAddress::ControlStatus field) const;
 
         /* ---- High level helpers ---- */
         /// @brief Select clock polarity/phase (SPI mode 0..3).
@@ -53,12 +53,12 @@ class SPI {
         bool can_write() const;
         bool can_read() const;
 
-        RPi3B::SPIRegistersAddress& memory() const {
+        BCM2837::SPIRegistersAddress& memory() const {
             return(m_memory);
         }
 
     private:
-        RPi3B::SPIRegistersAddress& m_memory;
+        BCM2837::SPIRegistersAddress& m_memory;
 };
 
 #endif /*__spi_hpp__*/

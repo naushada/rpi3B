@@ -74,10 +74,10 @@ TEST_F(GPIOTest, GPIO_Number_12_InputMode) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::InputMode);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::InputMode);
     auto res = gpio().read(gpio_n);
     //std::cout << "gpio in Result:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::InputMode);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::InputMode);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_OutputMode) {
@@ -86,10 +86,10 @@ TEST_F(GPIOTest, GPIO_Number_12_OutputMode) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::OutputMode);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::OutputMode);
     auto res = gpio().read(gpio_n);
     //std::cout << "gpio out Result:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::OutputMode);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::OutputMode);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction0) {
@@ -98,10 +98,10 @@ TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction0) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction0);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction0);
     auto res = gpio().read(gpio_n);
     //std::cout << "AlternateFunction0:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction0);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction0);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction1) {
@@ -110,10 +110,10 @@ TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction1) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction1);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction1);
     auto res = gpio().read(gpio_n);
     //std::cout << "AlternateFunction1:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction1);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction1);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction2) {
@@ -122,10 +122,10 @@ TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction2) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction2);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction2);
     auto res = gpio().read(gpio_n);
     //std::cout << "AlternateFunction2:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction2);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction2);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction3) {
@@ -134,10 +134,10 @@ TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction3) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction3);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction3);
     auto res = gpio().read(gpio_n);
     //std::cout << "AlternateFunction3:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction3);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction3);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction4) {
@@ -146,10 +146,10 @@ TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction4) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction4);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction4);
     auto res = gpio().read(gpio_n);
     //std::cout << "AlternateFunction4:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction4);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction4);
 }
 
 TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction5) {
@@ -158,23 +158,23 @@ TEST_F(GPIOTest, GPIO_Number_12_AlternateFunction5) {
      * GPIONumber 12 is mapped to GPIO PIN 32
     */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction5);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction5);
     auto res = gpio().read(gpio_n);
     //std::cout << "AlternateFunction5:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction5);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction5);
 }
 
 TEST_F(GPIOTest, GPIO_Number_2to9_OutputMode) {
 
     GPIO::gpio_number gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 
     gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::OutputMode);    
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::OutputMode);    
     }
 }
 
@@ -182,13 +182,13 @@ TEST_F(GPIOTest, GPIO_Number_10to19_OutputMode) {
 
     GPIO::gpio_number gpio_n = 10;
     for(; gpio_n < 20; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 
     gpio_n = 10;
     for(; gpio_n < 20; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 }
 
@@ -196,13 +196,13 @@ TEST_F(GPIOTest, GPIO_Number_20to27_OutputMode) {
 
     GPIO::gpio_number gpio_n = 20;
     for(; gpio_n < 28; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 
     gpio_n = 20;
     for(; gpio_n < 28; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 }
 
@@ -254,13 +254,13 @@ TEST_F(GPIOTest, GPIO_Number_2to9_AlternateFunction0) {
 
     GPIO::gpio_number gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction0);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction0);
     }
 
     gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction0);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction0);
     }
 }
 
@@ -268,13 +268,13 @@ TEST_F(GPIOTest, GPIO_Number_10to19_AlternateFunction2) {
 
     GPIO::gpio_number gpio_n = 10;
     for(; gpio_n < 20; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction2);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction2);
     }
 
     gpio_n = 10;
     for(; gpio_n < 20; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction2);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction2);
     }
 }
 
@@ -282,13 +282,13 @@ TEST_F(GPIOTest, GPIO_Number_20to27_AlternateFunction5) {
 
     GPIO::gpio_number gpio_n = 20;
     for(; gpio_n < 28; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction5);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction5);
     }
 
     gpio_n = 20;
     for(; gpio_n < 28; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction5);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction5);
     }
 }
 
@@ -296,13 +296,13 @@ TEST_F(GPIOTest, GPIO_Number_2to19_InputMode) {
 
     GPIO::gpio_number gpio_n = 2;
     for(; gpio_n < 20; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::InputMode);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::InputMode);
     }
 
     gpio_n = 2;
     for(; gpio_n < 20; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::InputMode);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::InputMode);
     }
 }
 
@@ -310,22 +310,22 @@ TEST_F(GPIOTest, GPIO_Number_2to19_OutputMode_AlternateFunction3) {
 
     GPIO::gpio_number gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 
     for(; gpio_n < 20; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction3);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction3);
     }
 
     gpio_n = 2;
     for(; gpio_n < 10; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::OutputMode);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::OutputMode);
     }
 
     for(; gpio_n < 20; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction3);
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction3);
     }
 }
 
@@ -333,22 +333,22 @@ TEST_F(GPIOTest, GPIO_Number_20to27_InputMode_AlternateFunction4) {
 
     GPIO::gpio_number gpio_n = 20;
     for(; gpio_n < 25; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::InputMode);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::InputMode);
     }
 
     for(; gpio_n < 28; ++gpio_n) {
-        gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction4);
+        gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction4);
     }
 
     gpio_n = 20;
     for(; gpio_n < 25; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::InputMode);    
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::InputMode);    
     }
 
     for(; gpio_n < 28; ++gpio_n) {
         auto res = gpio().read(gpio_n);
-        EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::AlternateFunction4);    
+        EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::AlternateFunction4);    
     }
 }
 
@@ -386,10 +386,10 @@ TEST_F(GPIOTest, GPIO_Number_14_InputMode) {
      * GPIONumber 12 is mapped to GPIO PIN 8
     */
     GPIO::gpio_number gpio_n = 14;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::InputMode);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::InputMode);
     auto res = gpio().read(gpio_n);
     //std::cout << "gpio in Result:" << std::to_string(res) << std::endl;
-    EXPECT_EQ(res, RPi3B::GPIORegistersAddress::Config::InputMode);
+    EXPECT_EQ(res, BCM2837::GPIORegistersAddress::Config::InputMode);
 }
 
 /* --- Regression tests for the fixes in docs/DRIVER_REVIEW.md §2.2 --- */
@@ -397,35 +397,35 @@ TEST_F(GPIOTest, GPIO_Number_14_InputMode) {
 TEST_F(GPIOTest, Output_Clears_Stale_AlternateFunction) {
     /* output() must clear the 3-bit FSEL field, not OR bit0 into a stale value. */
     GPIO::gpio_number gpio_n = 12;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction0); // 0b100
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction0); // 0b100
     gpio().output(gpio_n);
-    EXPECT_EQ(gpio().read(gpio_n), RPi3B::GPIORegistersAddress::Config::OutputMode); // 0b001
+    EXPECT_EQ(gpio().read(gpio_n), BCM2837::GPIORegistersAddress::Config::OutputMode); // 0b001
 }
 
 TEST_F(GPIOTest, Input_Clears_Field_And_Is_Readable) {
     GPIO::gpio_number gpio_n = 7;
-    gpio().write(gpio_n, RPi3B::GPIORegistersAddress::Config::AlternateFunction3);
+    gpio().write(gpio_n, BCM2837::GPIORegistersAddress::Config::AlternateFunction3);
     gpio().input(gpio_n);
-    EXPECT_EQ(gpio().read(gpio_n), RPi3B::GPIORegistersAddress::Config::InputMode); // 0b000
+    EXPECT_EQ(gpio().read(gpio_n), BCM2837::GPIORegistersAddress::Config::InputMode); // 0b000
 }
 
 TEST_F(GPIOTest, FSEL_Indexed_By_BCM_GPIO_Number) {
     /* GPIO 10 is the first field of GPFSEL1, regardless of header pin. */
-    gpio().write(10, RPi3B::GPIORegistersAddress::Config::OutputMode);
-    auto reg = gpio().memory().m_register[RPi3B::GPIORegistersAddress::Register::BCM2837_GPFSEL1].load();
-    EXPECT_EQ(reg & 0b111, RPi3B::GPIORegistersAddress::Config::OutputMode);
+    gpio().write(10, BCM2837::GPIORegistersAddress::Config::OutputMode);
+    auto reg = gpio().memory().m_register[BCM2837::GPIORegistersAddress::Register::BCM2837_GPFSEL1].load();
+    EXPECT_EQ(reg & 0b111, BCM2837::GPIORegistersAddress::Config::OutputMode);
 }
 
 TEST_F(GPIOTest, GPSETn_Below32_Does_Not_Touch_Bank1) {
     gpio().GPSETn(20);
     EXPECT_EQ(gpio().GPGETn(20), 1U);
-    EXPECT_EQ(gpio().memory().m_register[RPi3B::GPIORegistersAddress::Register::BCM2837_GPSET1].load(), 0U);
+    EXPECT_EQ(gpio().memory().m_register[BCM2837::GPIORegistersAddress::Register::BCM2837_GPSET1].load(), 0U);
 }
 
 TEST_F(GPIOTest, GPSETn_AtOrAbove32_Targets_Bank1) {
     gpio().GPSETn(40);
     EXPECT_EQ(gpio().GPGETn(40), 1U);
-    auto reg = gpio().memory().m_register[RPi3B::GPIORegistersAddress::Register::BCM2837_GPSET1].load();
+    auto reg = gpio().memory().m_register[BCM2837::GPIORegistersAddress::Register::BCM2837_GPSET1].load();
     EXPECT_EQ((reg >> 8) & 1U, 1U); /* gpio 40 -> bank1 bit 8 */
 }
 
