@@ -167,13 +167,14 @@ GPIO gpio;
 gpio.output(17);
 gpio.GPSETn(17);
 
-// I2C (BSC1) — address a device and start a write
-I2C i2c;
-i2c.enable();
-i2c.slave_address(0x48);
-i2c.data_length(2);
-i2c.write_byte(0xAB);
-i2c.start_write();
+// I2C (BSC1) — read a device register via the transaction layer
+I2C i2c; GPIO gpio;
+Bcm2837I2cTransport bus(i2c, gpio);
+bus.bus_init();                          // GPIO2/3 → ALT0, clock divider, enable
+std::uint8_t whoami = 0;
+bus.read_reg(/*addr=*/0x68, /*reg=*/0x00, &whoami, 1);   // write reg ptr, then read
+// (the raw I2C register API — i2c.slave_address()/write_byte()/start_write() —
+//  is still there if you want to drive the BSC registers directly.)
 
 // SPI0 — mode 0, CE0, one byte
 SPI spi;
@@ -187,6 +188,35 @@ spi.write_byte(0x55);
 > Register addressing is by **BCM GPIO number** (not 40-pin header pin). I2C/SPI
 > additionally require the relevant pins muxed to ALT0 (GPIO2/3 for I2C1,
 > GPIO7–11 for SPI0) and the peripheral clock divided appropriately.
+
+---
+
+## I²C transaction layers
+
+The raw `I2C` driver is a register model — it sets the address/DLEN/FIFO but does
+not *sequence* a transfer. On top of it sits a small abstract seam,
+**`I2cTransport`** (`inc/i2c_bus.hpp`), with `read` / `write` / `write_read` plus
+`read_reg` / `write_reg` helpers. Device/sensor drivers depend on the seam, so
+they are host-unit-testable against a fake. Three implementations ship:
+
+| Transport | Header | Use it for |
+|-----------|--------|-----------|
+| `Bcm2837I2cTransport` | `i2c_bus.hpp` | **Polled** BSC1 register transfer — the bare-metal default / no-`i2c-dev` fallback. `bus_init()` muxes GPIO2/3→ALT0, sets the divider, enables BSC1; the FIFO is pumped against `S.DONE`/`ERR`/`CLKT`. |
+| `I2cDevTransport` | `i2c_dev.hpp` | **Linux `/dev/i2c-N`** via `ioctl(I2C_RDWR)` — **preferred on a booted Pi**: needs only r/w on the node (group `i2c`, no `CAP_SYS_RAWIO`/`/dev/mem`) and gives a real combined repeated-START. Header-only, Linux-only. |
+| `Bcm2837I2cIrqTransport` | `i2c_irq.hpp` | **Interrupt-driven** bare-metal variant — DONE/TXW/RXR ISR + watchdog + async callback. `WFI` is gated behind `-DI2C_IRQ_BAREMETAL`. Design: [`docs/i2c-irq-transport-spec.md`](docs/i2c-irq-transport-spec.md). |
+
+```cpp
+// Booted Pi, unprivileged: read a register over /dev/i2c-1
+#include "i2c_dev.hpp"
+I2cDevTransport bus("/dev/i2c-1");
+std::uint8_t id = 0;
+if (bus.read_reg(0x68, 0x00, &id, 1) == I2cResult::Ok) { /* id == chip id */ }
+```
+
+`I2cResult` is `Ok` / `BadArg` / `Timeout` / `Nack` / `ClockTimeout`. All three
+transports share the seam, so swapping one for another is a one-line change, and
+each is covered by host gtests (a scripted status/ISR seam, or a
+`FakeI2cTransport`) — no hardware required.
 
 ---
 
