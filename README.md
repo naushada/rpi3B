@@ -1,5 +1,7 @@
 # rpi3B — bare-metal peripheral drivers for the Raspberry Pi 3B (BCM2837)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A small, header-light C++ driver layer for the Broadcom **BCM2837** SoC on the
 Raspberry Pi 3B. Each peripheral is modelled as a memory-mapped register block
 that the driver classes read/modify/write through typed, field-level accessors.
@@ -9,6 +11,81 @@ Peripherals: **GPIO**, **Clock manager (CM_GPn)**, **Interrupt controller**,
 
 > See [`docs/DRIVER_REVIEW.md`](docs/DRIVER_REVIEW.md) for the design review,
 > the per-peripheral issue log, and what is fixed vs. still open.
+
+---
+
+## Overview
+
+This is a **dependency-light, register-level driver library** for the BCM2837's
+on-chip peripherals — the kind of thing you'd reach for in a freestanding /
+RTOS firmware, a teaching project, or (as it's actually used) a userspace driver
+on a booted Pi. It is deliberately small: no HAL framework, no RTOS coupling,
+just typed register blocks and field accessors you compose yourself.
+
+What makes it practical is a single **placement-`new` seam** that lets the *same*
+driver code run two ways:
+
+- **On hardware** — the register block is overlaid on the peripheral's physical
+  MMIO address, so reads/writes hit real silicon.
+- **On a host (no hardware)** — the same block is overlaid on an ordinary
+  `std::vector<uint32_t>`, so the bit-layout logic is exercised by GoogleTest
+  with zero hardware. Every peripheral ships such a test.
+
+On a *booted Linux* Pi, [`inc/mmio.hpp`](inc/mmio.hpp) bridges the two: it
+`mmap`s a peripheral block through `/dev/mem` (or `/dev/gpiomem` for GPIO) and
+hands the live pointer to the very same region constructor the tests use — so
+the host-verified code drives actual pins.
+
+This library is **vendored into** the [`naushada/iot`](https://github.com/naushada/iot)
+LwM2M gateway (under `modules/bcm2837`), where its I²C driver backs the mangOH
+Yellow sensor integration and its gtest suite runs as a boot-time self-test.
+
+**What it is not:** a complete bare-metal runtime. There is no cross toolchain,
+linker script, or `_start` in this repo — see [Status](#status) and
+`docs/DRIVER_REVIEW.md` for the precise boundaries.
+
+---
+
+## Hardware requirements
+
+**Target SoC — Broadcom BCM2837** (quad-core ARM Cortex-A53). The driver hard-codes
+the **`0x3F000000` peripheral base** used by the BCM2836/BCM2837, so it targets:
+
+| Board | SoC | Supported |
+|-------|-----|-----------|
+| Raspberry Pi **3 Model B / 3B+** | BCM2837 / BCM2837B0 | ✅ primary target |
+| Raspberry Pi **2 Model B** (v1.2) | BCM2837 | ✅ (same peripheral base) |
+| Raspberry Pi **2 Model B** (v1.1) | BCM2836 | ✅ (same `0x3F…` base) |
+| Compute Module **3 / 3+** | BCM2837 | ✅ (same peripherals) |
+| Pi 1 / Pi Zero / Zero W | BCM2835 | ❌ peripheral base is `0x20000000` |
+| Pi 4 / 400 / CM4 | BCM2711 | ❌ peripheral base is `0xFE000000` |
+
+> Porting to another base is a one-line change per peripheral
+> (`memory_map.hpp` `operator new` + `mmio.hpp` `PERIPH_BASE`), but is untested.
+
+**Pin/peripheral mapping** (BCM GPIO numbers, not 40-pin header positions):
+
+| Peripheral | Pins (ALT0) | Notes |
+|------------|-------------|-------|
+| GPIO       | any of GPIO0–53 | direct |
+| I²C1 (BSC1) | SDA1 = GPIO2, SCL1 = GPIO3 | mux to ALT0 + set clock divider |
+| SPI0       | GPIO7–GPIO11 (CE1/CE0/MISO/MOSI/SCLK) | mux to ALT0 + set clock divider |
+| Clock mgr  | (internal) | GP clock generators |
+| Interrupt  | (internal) | bare-metal IVT only |
+
+**To run on real hardware you also need:**
+
+- A **booted OS on the Pi** (this is not a standalone bootable image — see Status).
+- For the Linux MMIO path: `root` / `CAP_SYS_RAWIO` for `/dev/mem`, or membership
+  of the `gpio` group for the unprivileged `/dev/gpiomem` (GPIO only).
+- I²C / SPI pins **muxed to ALT0** and the peripheral **clock divider** programmed
+  — the register writes alone do not configure the pin mux.
+- For a true bare-metal build: an **`aarch64` cross toolchain** + linker script +
+  startup — **not provided here**.
+
+**To build and test without any hardware:** just a host with a **C++20 compiler**
+(GCC ≥ 9 / Clang ≥ 10), **CMake ≥ 3.16**, and **GoogleTest** (for the suite). The
+register/bit-layout tests run anywhere.
 
 ---
 
@@ -155,3 +232,7 @@ under `modules/bcm2837` and built as the `bcm2837_driver` library. Its
 gtest suite ships as the **`iot-bcm2837-selftest`** systemd oneshot, which runs the
 bit-layout suite once at boot and records pass/fail in the journal (gated by the
 recipe's `bcm2837-selftest` PACKAGECONFIG).
+
+## License
+
+Released under the [MIT License](LICENSE) — © 2026 Mohd Naushad Ahmed.
