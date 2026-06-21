@@ -155,7 +155,20 @@ ctest --test-dir build            # or: ./build/test/bcm2837_test
 ```
 
 Tests construct each driver over a `std::vector<uint32_t>` and assert the
-register **bit-layout** — no hardware required.
+register **bit-layout** — no hardware required. The suite passes under both
+`-O0` and `-O2`/`-O3` (the fixtures explicitly re-zero the overlay storage; see
+[`docs/DRIVER_REVIEW.md`](docs/DRIVER_REVIEW.md) §2.1 for why).
+
+### Containerised build (podman/docker)
+
+A [`Dockerfile`](Dockerfile) builds the library, demo, and gtest suite in a
+pinned Debian image and runs the suite at build time (fatal by default):
+
+```bash
+podman build -t bcm2837:latest .                 # builds + runs the 94-case suite
+podman run --rm bcm2837:latest                   # demo usage
+podman run --rm --entrypoint bcm2837_test bcm2837:latest   # run the suite
+```
 
 ---
 
@@ -240,6 +253,25 @@ root / `CAP_SYS_RAWIO`); `map_gpiomem()` maps **GPIO only** via the unprivileged
 the mapping and unmaps on scope exit. The demo binary does this under
 `bcm2837_demo --blink`.
 
+### Supported boards (auto-detected)
+
+The peripheral *offsets* are identical across the BCM283x and BCM2711 families;
+only the peripheral base differs. The `map_*` factories detect the running
+board's base at runtime from `/proc/device-tree/soc/ranges`, so **one Linux
+binary targets every supported Pi**:
+
+| SoC | Peripheral base | Boards |
+|-----|-----------------|--------|
+| BCM2835   | `0x20000000` | Pi 1, Pi Zero, Pi Zero W |
+| BCM2836/7 | `0x3F000000` | Pi 2, Pi 3, Pi Zero 2 W |
+| BCM2711   | `0xFE000000` | Pi 4, Pi 400, CM4 |
+
+Detection falls back to BCM2836/7 (`0x3F000000`) if the device tree is
+unreadable; pass a nonzero base to `BCM2837::periph_base(...)` to force one
+(e.g. `BCM2837::periph_base(static_cast<std::uintptr_t>(BCM2837::SocPeriphBase::BCM2711))`).
+A *bare-metal* build instead selects the base at compile time with
+`-DBCM_PERIPH_BASE=0x20000000` (see [`inc/memory_map.hpp`](inc/memory_map.hpp)).
+
 This is safe because `BCM2837::mmio_reg` (the register cell type) is *trivially
 default-constructible*: placement-new'ing a register block over live MMIO
 **overlays** the registers instead of zeroing them. `IRQ` is **not** exposed
@@ -262,6 +294,16 @@ under `modules/bcm2837` and built as the `bcm2837_driver` library. Its
 gtest suite ships as the **`iot-bcm2837-selftest`** systemd oneshot, which runs the
 bit-layout suite once at boot and records pass/fail in the journal (gated by the
 recipe's `bcm2837-selftest` PACKAGECONFIG).
+
+## Documentation
+
+In-repo design and reference docs under [`docs/`](docs/):
+
+| Doc | What it covers |
+|-----|----------------|
+| [`docs/DRIVER_REVIEW.md`](docs/DRIVER_REVIEW.md) | Per-peripheral design review and the open/fixed issue log. |
+| [`docs/i2c-irq-transport-spec.md`](docs/i2c-irq-transport-spec.md) | Spec for the interrupt-driven I²C transport (`Bcm2837I2cIrqTransport`). |
+| [`docs/HARDWARE_PROPOSAL.md`](docs/HARDWARE_PROPOSAL.md) | Proposal for a minimal battery-powered IoT gateway + WiFi AP running `device-iot`. |
 
 ## License
 

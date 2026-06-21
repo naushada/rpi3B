@@ -9,8 +9,11 @@ same framework while avoiding the bugs listed here.
 **fixed and merged** (PR #1), with regression tests. **I2C (BSC1)** and **SPI0**
 are **implemented and shipped** (§3). The build is now library-consumable
 (`bcm2837_driver` static lib) and the repo is vendored into the `iot` Yocto image
-as the `iot-bcm2837-selftest` boot oneshot. The **Clock** defects (§2.3) and the
-remaining design notes in §2.1 are **still open**.
+as the `iot-bcm2837-selftest` boot oneshot. The **test-harness** defects that made
+17/94 cases fail under `-O2`/`-O3` (uninitialised overlay storage + an undersized
+IRQ buffer, §2.1) are **fixed** — the suite is now **100% green in Release**. The
+remaining **Clock** design notes (§2.3) and the design notes in §2.1 are **still
+open**.
 
 ---
 
@@ -59,7 +62,10 @@ Methods read/modify/write fields of `m_memory.m_register[...]`.
 A GoogleTest fixture allocates `std::vector<uint32_t>(Register::MAX)` and
 constructs the driver over it (`m_driver(DRIVER(m_memory_region.data()))`), so
 register reads/writes hit the vector instead of real MMIO. Tests therefore only
-verify the **bit-layout arithmetic**, not real hardware behaviour.
+verify the **bit-layout arithmetic**, not real hardware behaviour. The fixture
+`std::memset`s the region to 0 *after* constructing the driver — the overlay's
+trivial constructor lets the optimiser drop the vector's value-init, so the
+registers must be re-zeroed through a store the `volatile` reads observe (§2.1).
 
 ### 1.4 Build
 - Root `CMakeLists.txt` builds the `bcm2837_demo` executable as a **hosted** binary.
@@ -96,6 +102,27 @@ bug / inconsistency · **[L]** cosmetic / warning.
   default-constructible `volatile uint32_t` wrapper whose compound operators do
   an explicit volatile load/modify/store (no `-Wdeprecated-volatile`). This lets
   `inc/mmio.hpp` overlay live registers via `/dev/mem` without clobbering them.
+- **[H] Test fixtures read uninitialised registers under `-O2`/`-O3`.** ✅
+  **FIXED.** Each fixture did `std::vector<uint32_t>(MAX)` (value-initialised to
+  0) and then placement-new'd the register block over it. Because `mmio_reg` is
+  trivially default-constructible *by design* (so the overlay never clobbers live
+  MMIO, §2.1 above), the placement-new ends the vector elements' lifetimes
+  without rewriting them — and the optimiser, seeing the zero-init is never
+  observed before the lifetime change, drops it as a **dead store**. The
+  registers then start as heap garbage, so any test that reads a register it did
+  not itself write (e.g. `SPITest.Status_Helpers_DefaultZero`,
+  `IRQTest.*`, and the Clock `CM_GP0DIV`/`CM_GP2DIV` cases) failed in **Release
+  only** — 17/94 — while passing under `-O0`. The fixtures now `std::memset` the
+  region to 0 **after** the overlay is constructed; those stores are observed by
+  the drivers' `volatile` reads and cannot be elided.
+- **[H] IRQ test buffer too small for the overlaid IVT.** ✅ **FIXED.** `IRQ`
+  overlays the register block *and* places an `IVT` immediately past it (at
+  `region + IRQs_ALL_MAX`), but the fixture sized the vector to only
+  `IRQs_ALL_MAX` words. `install_IRQHandler`/`install_FIQHandler` therefore wrote
+  the vector past its end — a heap overflow that surfaced as a **bus error**
+  (`IRQTest.Install_Handlers_Does_Not_Crash`). The fixture now sizes the region
+  to `IRQs_ALL_MAX + ceil(sizeof(IVT)/4)` words so both the registers and the IVT
+  fit.
 - **[L] Include guards on `.cpp` files** (`#ifndef __gpio_cpp__`) — harmless but
   unusual.
 - **[L] Debug `printf` loop in `InterruptRegisterAddress` ctor** runs on every
