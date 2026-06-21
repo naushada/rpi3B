@@ -30,11 +30,9 @@ COPY . .
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
  && cmake --build build -j"$(nproc)"
 
-# Run the host self-test. Reported but non-fatal by default, since the suite
-# currently carries known pre-existing failures (Clock/IRQ/SPI layout — see
-# docs/DRIVER_REVIEW.md). Build with --build-arg STRICT_TESTS=1 to make any
-# test failure fail the image build.
-ARG STRICT_TESTS=0
+# Run the host self-test. Fatal by default: any failure fails the image build.
+# Pass --build-arg STRICT_TESTS=0 to make the run report-only.
+ARG STRICT_TESTS=1
 RUN ctest --test-dir build --output-on-failure || [ "$STRICT_TESTS" = "0" ]
 
 # ── Runtime stage ───────────────────────────────────────────────────────────

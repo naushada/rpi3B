@@ -155,7 +155,20 @@ ctest --test-dir build            # or: ./build/test/bcm2837_test
 ```
 
 Tests construct each driver over a `std::vector<uint32_t>` and assert the
-register **bit-layout** — no hardware required.
+register **bit-layout** — no hardware required. The suite passes under both
+`-O0` and `-O2`/`-O3` (the fixtures explicitly re-zero the overlay storage; see
+[`docs/DRIVER_REVIEW.md`](docs/DRIVER_REVIEW.md) §2.1 for why).
+
+### Containerised build (podman/docker)
+
+A [`Dockerfile`](Dockerfile) builds the library, demo, and gtest suite in a
+pinned Debian image and runs the suite at build time (fatal by default):
+
+```bash
+podman build -t bcm2837:latest .                 # builds + runs the 94-case suite
+podman run --rm bcm2837:latest                   # demo usage
+podman run --rm --entrypoint bcm2837_test bcm2837:latest   # run the suite
+```
 
 ---
 
