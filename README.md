@@ -48,20 +48,26 @@ linker script, or `_start` in this repo — see [Status](#status) and
 
 ## Hardware requirements
 
-**Target SoC — Broadcom BCM2837** (quad-core ARM Cortex-A53). The driver hard-codes
-the **`0x3F000000` peripheral base** used by the BCM2836/BCM2837, so it targets:
+**Primary SoC — Broadcom BCM2837** (quad-core ARM Cortex-A53), but the driver is
+**multi-SoC**: the peripheral register *offsets* are identical across the
+BCM283x and BCM2711 families, so only the peripheral **base** differs. On a
+booted Pi the base is **auto-detected at runtime** (see [Supported boards](#supported-boards-auto-detected)),
+so one binary runs on every board below:
 
-| Board | SoC | Supported |
-|-------|-----|-----------|
-| Raspberry Pi **3 Model B / 3B+** | BCM2837 / BCM2837B0 | ✅ primary target |
-| Raspberry Pi **2 Model B** (v1.2) | BCM2837 | ✅ (same peripheral base) |
-| Raspberry Pi **2 Model B** (v1.1) | BCM2836 | ✅ (same `0x3F…` base) |
-| Compute Module **3 / 3+** | BCM2837 | ✅ (same peripherals) |
-| Pi 1 / Pi Zero / Zero W | BCM2835 | ❌ peripheral base is `0x20000000` |
-| Pi 4 / 400 / CM4 | BCM2711 | ❌ peripheral base is `0xFE000000` |
+| Board | SoC | Peripheral base | Supported |
+|-------|-----|-----------------|-----------|
+| Pi **1** (A/B/A+/B+) / **Zero** / **Zero W** | BCM2835 | `0x20000000` | ✅ auto-detected |
+| Raspberry Pi **2 Model B** (v1.1) | BCM2836 | `0x3F000000` | ✅ auto-detected |
+| Raspberry Pi **2 Model B** (v1.2) | BCM2837 | `0x3F000000` | ✅ auto-detected |
+| Raspberry Pi **3 Model B / 3B+** | BCM2837 / BCM2837B0 | `0x3F000000` | ✅ primary target |
+| **Zero 2 W** / Compute Module **3 / 3+** | BCM2837 | `0x3F000000` | ✅ auto-detected |
+| Pi **4** / **400** / **CM4** | BCM2711 | `0xFE000000` | ✅ auto-detected |
 
-> Porting to another base is a one-line change per peripheral
-> (`memory_map.hpp` `operator new` + `mmio.hpp` `PERIPH_BASE`), but is untested.
+> The **Linux MMIO path** picks the base from `/proc/device-tree/soc/ranges` at
+> first use (override via `BCM2837::periph_base(...)`). A **bare-metal** build
+> instead selects it at compile time with `-DBCM_PERIPH_BASE=0x20000000` /
+> `0x3F000000` / `0xFE000000` (see `inc/memory_map.hpp`). Verified on the host
+> for all three bases; on-silicon coverage is still BCM2837.
 
 **Pin/peripheral mapping** (BCM GPIO numbers, not 40-pin header positions):
 
