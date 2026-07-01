@@ -10,7 +10,7 @@ jobs:
     name: Host gtest suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install toolchain + GoogleTest
         run: |
           sudo apt-get update
@@ -26,7 +26,7 @@ jobs:
     name: Freestanding kernel boot-test (QEMU raspi3b)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install aarch64 cross toolchain + QEMU
         run: |
           sudo apt-get update
