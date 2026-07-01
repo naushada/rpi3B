@@ -101,30 +101,56 @@ VBAR record, plus the §2.4 regressions).
 
 The model above is now driven by a real bootable image under
 [`freestanding/`](../freestanding), built with the aarch64 cross toolchain and
-**verified booting in QEMU `raspi3b`** (a generic-timer IRQ travels through the
-vector table → `IRQ::dispatch()` → the registered handler, printing ticks over
-the UART). The same `IRQ`/`IVT` C++ types drive it unchanged; the only build
+**verified booting in QEMU `raspi3b`**. It enables the MMU and brings up **all
+four cores**; each core takes its *own* generic-timer IRQ through the vector
+table → `IRQ::dispatch(core)` → the registered handler, printing per-core ticks
+over the UART. The same `IRQ`/`IVT` C++ types drive it unchanged; the only build
 difference is `-DINTERRUPT_BAREMETAL` and the freestanding flags.
 
 | Piece | File | What it does |
 |-------|------|--------------|
-| Boot + EL2→EL1 drop | `boot.S` | Park cores 1–3; drop EL3/EL2→EL1; set `CNTHCTL_EL2.EL1PC{T,}EN` so EL1 can use the physical timer; stack; clear `.bss`; call `kmain`. |
+| Boot + EL2→EL1 drop | `boot.S` | Each core gets its own stack (`_start − N·0x10000`) and drops EL3/EL2→EL1, setting `CNTHCTL_EL2.EL1PC{T,}EN` so EL1 can use the physical timer; **core 0** clears `.bss` and calls `kmain`, cores 1–3 branch to `ksecondary`. |
+| MMU bring-up | `mmu.cpp` | Identity map via `TTBR0_EL1` (4 KB granule, 39-bit VA): RAM Normal cacheable **inner-shareable**, peripherals + ARM-local Device-nGnRnE. Core 0 builds the shared tables once (MMU off); every core calls `mmu_enable()`. |
+| SMP bring-up | `smp.cpp` | Core 0 releases cores 1–3 via the Pi 3 spin-table mailboxes (`0xe0/0xe8/0xf0`); each secondary enables the MMU, sets its own `VBAR_EL1`, routes `CORE_TIMER_IRQCNTL[core]`, and lands in `ksecondary()`. A single shared `timer_isr()` services all four. |
 | Vector table | `vectors.S` | The 2 KB-aligned, 16 × `0x80` `VBAR_EL1` table; context save/restore (`x0..x30`, `ELR_EL1`, `SPSR_EL1`); `el1_irq` → `irq_handler_c`, others → `bad_exception_c`. |
-| Exception glue | `exceptions.cpp` | `irq_handler_c()` → `IRQ::dispatch(0)`; `bad_exception_c()` prints `ESR/ELR` and halts. |
-| Demo | `kmain.cpp` | `install_vector_table(vector_table)` → `VBAR_EL1`; register `CNTPNSIRQ`; route it via `CORE_TIMER_IRQCNTL0`; program the timer; unmask; `wfi`. |
-| Console / libc | `uart.cpp`, `libc_min.cpp` | Minimal PL011 + `printf`/`mem*` (the driver's ctor `printf` becomes a boot sign-of-life over UART). |
-| Build | `linker.ld`, `toolchain-aarch64.cmake`, `CMakeLists.txt` | `kernel8.elf` at `0x80000` → `objcopy` → `kernel8.img`. |
+| Exception glue | `exceptions.cpp` | `irq_handler_c()` → `IRQ::dispatch(core_id())` (each core reads its own `CORE_IRQ_SOURCE`); `bad_exception_c()` prints `ESR/ELR` and halts. |
+| Demo | `kmain.cpp` | Core 0: enable MMU; `install_vector_table(vector_table)` → `VBAR_EL1`; register `CNTPNSIRQ`; release the secondaries; start its own timer; `wfi`. |
+| Console / libc | `uart.cpp`, `libc_min.cpp` | Minimal PL011 + `printf`/`mem*`, plus a **cross-core console lock** (cacheable exclusives) so the four cores' output stays legible. |
+| Build | `linker.ld`, `toolchain-aarch64.cmake`, `CMakeLists.txt` | `kernel8.elf` at `0x80000` → `objcopy` → `kernel8.img`. `-mno-outline-atomics` inlines the spinlock's exclusives (no libgcc). |
 | Reproducible run | `Dockerfile`, `build-and-run.sh` | Debian builder (aarch64 cross + QEMU) that builds and boots the image. |
 
 ```bash
 podman build -t bcm2837-bm-builder -f freestanding/Dockerfile freestanding
 podman run --rm -v "$PWD":/src:Z -w /src bcm2837-bm-builder freestanding/build-and-run.sh
-# ... running at EL1 / VBAR_EL1 -> vector_table @ 0x80800 / [irq] timer tick #1, #2, ...
+# core 0 running at EL1 / MMU enabled ... / VBAR_EL1 -> vector_table @ 0x80800
+# [core 0] online / [core 1] online / ... / [core 0] timer tick #1 / [core 1] timer tick #1 ...
 ```
 
-**Still intentionally minimal** (not needed to prove the IVT, natural next steps):
-MMU/caches are off (all accesses are Device — fine for MMIO + this demo but slow
-for real workloads); no SMP bring-up (cores 1–3 stay parked); the console is
-PL011-only. On real hardware the image is a `kernel8.img` for the SD card
-(`arm_64bit=1`); the EL the firmware hands over at depends on `armstub` — the
-boot code drops from EL3/EL2/EL1 as found.
+### MMU + SMP
+
+The four cores share one set of translation tables and one dispatch table, so
+the interrupt model scales from one core to four with no per-core copies:
+
+- **MMU (why it's a prerequisite for SMP).** The RAM mapping is *Normal cacheable
+  inner-shareable*; that shareability attribute is what makes the cores'
+  data caches **coherent**, so the shared dispatch table, the tick counters, and
+  the console lock behave the same on every core. MMIO stays *Device-nGnRnE* to
+  keep register accesses strongly-ordered. Core 0 writes the tables with the MMU
+  off (the stores reach RAM), then each core enables translation.
+- **SMP release.** QEMU `raspi3b` (like a real Pi 3) holds cores 1–3 in the
+  armstub spin-table, each polling a release mailbox. Core 0 writes the image
+  entry (`_start`) into `0xe0/0xe8/0xf0` and `SEV`s — cleaning the cache line to
+  the point of coherency first, since its caches are on but the secondaries poll
+  with the MMU off. Each secondary re-enters `boot.S`, drops to EL1, and runs
+  `ksecondary()`.
+- **Per-core dispatch.** Every core arms its own physical timer via
+  `CORE_TIMER_IRQCNTL[core]` and sets its own `VBAR_EL1`. When a timer fires, the
+  IRQ is taken on that core; `irq_handler_c()` calls `IRQ::dispatch(core_id())`,
+  which reads that core's `CORE_IRQ_SOURCE[core]` (§3) and invokes the one shared
+  handler — so a single `register_handler(CNTPNSIRQ, …)` on core 0 services all
+  four.
+
+On real hardware the image is a `kernel8.img` for the SD card (`arm_64bit=1`);
+the EL the firmware hands over at depends on `armstub` — the boot code drops from
+EL3/EL2/EL1 as found. Still intentionally minimal beyond this: no scheduler or
+user tasks, and the console is PL011-only.
