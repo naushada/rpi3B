@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  host-tests:
+    name: Host gtest suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain + GoogleTest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake g++ libgtest-dev
+      - name: Configure
+        run: cmake -S . -B build -DBCM2837_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build -j
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  qemu-boot:
+    name: Freestanding kernel boot-test (QEMU raspi3b)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install aarch64 cross toolchain + QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake gcc-aarch64-linux-gnu g++-aarch64-linux-gnu qemu-system-arm
+      - name: Build kernel8.img and assert the IVT path in QEMU
+        run: freestanding/boot-test.sh
+        # Asserts: reached EL1, installed VBAR_EL1, and >=3 generic-timer IRQs
+        # travelled through IRQ::dispatch() — see freestanding/boot-test.sh.

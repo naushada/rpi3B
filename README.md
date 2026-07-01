@@ -1,5 +1,6 @@
 # rpi3B — bare-metal peripheral drivers for the Raspberry Pi 3B (BCM2837)
 
+[![CI](https://github.com/naushada/rpi3B/actions/workflows/ci.yml/badge.svg)](https://github.com/naushada/rpi3B/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A small, header-light C++ driver layer for the Broadcom **BCM2837** SoC on the
