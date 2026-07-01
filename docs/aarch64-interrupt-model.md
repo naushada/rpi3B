@@ -97,23 +97,34 @@ VBAR record, plus the §2.4 regressions).
 
 ---
 
-## Runtime phase (deferred)
+## Freestanding runtime — implemented (`freestanding/`)
 
-This phase is the **model**. A real freestanding boot additionally needs (none of
-which is host-testable, so it is intentionally out of scope here):
+The model above is now driven by a real bootable image under
+[`freestanding/`](../freestanding), built with the aarch64 cross toolchain and
+**verified booting in QEMU `raspi3b`** (a generic-timer IRQ travels through the
+vector table → `IRQ::dispatch()` → the registered handler, printing ticks over
+the UART). The same `IRQ`/`IVT` C++ types drive it unchanged; the only build
+difference is `-DINTERRUPT_BAREMETAL` and the freestanding flags.
 
-- **Asm vector stub** — a 2 KB-aligned `.vectors` section of 16 `0x80`-byte slots,
-  each `b <handler>`, with a **context save/restore** macro (push/pop `x0..x30`,
-  `SP`, `ELR_EL1`, `SPSR_EL1`) around the C handler that calls
-  `IRQ::dispatch()`.
-- **`VBAR_EL1` install** at boot via `install_vector_table(&vectors)` built with
-  `-DINTERRUPT_BAREMETAL`.
-- **EL2 → EL1 drop** — the Pi's GPU firmware (`armstub8.S`) starts the cores in
-  **EL2**. Before installing `VBAR_EL1` the runtime must set `HCR_EL2.RW` (EL1 is
-  AArch64), stage `SPSR_EL2`/`ELR_EL2`, and `eret` to EL1.
-- **`_start` + linker script** placing `.vectors`, the stack, and `.bss`, and a
-  cross **`aarch64-none-elf` toolchain** — none of which exists in this repo yet
-  (see the README *Status* section).
+| Piece | File | What it does |
+|-------|------|--------------|
+| Boot + EL2→EL1 drop | `boot.S` | Park cores 1–3; drop EL3/EL2→EL1; set `CNTHCTL_EL2.EL1PC{T,}EN` so EL1 can use the physical timer; stack; clear `.bss`; call `kmain`. |
+| Vector table | `vectors.S` | The 2 KB-aligned, 16 × `0x80` `VBAR_EL1` table; context save/restore (`x0..x30`, `ELR_EL1`, `SPSR_EL1`); `el1_irq` → `irq_handler_c`, others → `bad_exception_c`. |
+| Exception glue | `exceptions.cpp` | `irq_handler_c()` → `IRQ::dispatch(0)`; `bad_exception_c()` prints `ESR/ELR` and halts. |
+| Demo | `kmain.cpp` | `install_vector_table(vector_table)` → `VBAR_EL1`; register `CNTPNSIRQ`; route it via `CORE_TIMER_IRQCNTL0`; program the timer; unmask; `wfi`. |
+| Console / libc | `uart.cpp`, `libc_min.cpp` | Minimal PL011 + `printf`/`mem*` (the driver's ctor `printf` becomes a boot sign-of-life over UART). |
+| Build | `linker.ld`, `toolchain-aarch64.cmake`, `CMakeLists.txt` | `kernel8.elf` at `0x80000` → `objcopy` → `kernel8.img`. |
+| Reproducible run | `Dockerfile`, `build-and-run.sh` | Debian builder (aarch64 cross + QEMU) that builds and boots the image. |
 
-Once those land, the same `IRQ`/`IVT` C++ types drive real silicon unchanged; the
-only build difference is `-DINTERRUPT_BAREMETAL` and the freestanding flags.
+```bash
+podman build -t bcm2837-bm-builder -f freestanding/Dockerfile freestanding
+podman run --rm -v "$PWD":/src:Z -w /src bcm2837-bm-builder freestanding/build-and-run.sh
+# ... running at EL1 / VBAR_EL1 -> vector_table @ 0x80800 / [irq] timer tick #1, #2, ...
+```
+
+**Still intentionally minimal** (not needed to prove the IVT, natural next steps):
+MMU/caches are off (all accesses are Device — fine for MMIO + this demo but slow
+for real workloads); no SMP bring-up (cores 1–3 stay parked); the console is
+PL011-only. On real hardware the image is a `kernel8.img` for the SD card
+(`arm_64bit=1`); the EL the firmware hands over at depends on `armstub` — the
+boot code drops from EL3/EL2/EL1 as found.

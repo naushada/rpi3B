@@ -73,16 +73,20 @@ class IVT {
         ~IVT() {}
 
         /**
-         * @brief Placement-new seam. With no region the freestanding default
-         *        address is 0 (the real table lives at VBAR, set separately by
-         *        IRQ::install_vector_table); tests always pass a buffer.
+         * @brief Placement-new seam. With no region (the freestanding default)
+         *        the vector/dispatch table is backed by static storage in the
+         *        image's .bss — a real kernel keeps this software table in RAM
+         *        (the *architectural* table lives at VBAR, set separately by
+         *        IRQ::install_vector_table). Tests always pass a buffer. A kernel
+         *        has a single IVT, so sharing the static backing is intentional.
          * @param nBytes Number of bytes to be allocated
          * @param region is the memory region to be returned if present.
          */
         void *operator new(std::size_t nBytes, void *region=nullptr) {
             (void)nBytes;
             if(nullptr == region) {
-                return reinterpret_cast<void *>((0x00000000U));
+                alignas(IVT) static unsigned char storage[sizeof(IVT)];
+                return static_cast<void *>(storage);
             }
             return(region);
         }
