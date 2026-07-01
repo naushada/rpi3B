@@ -20,6 +20,25 @@ namespace {
     }
 
     constexpr std::uint32_t FR_TXFF = 1u << 5;   // transmit FIFO full
+
+    // Cross-core console lock (enabled once the MMU is on so the exclusive
+    // monitor works on Normal cacheable inner-shareable memory).
+    volatile unsigned g_lock    = 0;
+    bool              g_locking = false;
+}
+
+void uart_enable_lock() { g_locking = true; }
+
+void uart_lock() {
+    if(!g_locking) return;
+    while(__atomic_exchange_n(&g_lock, 1u, __ATOMIC_ACQUIRE))
+        __asm__ volatile("wfe");
+}
+
+void uart_unlock() {
+    if(!g_locking) return;
+    __atomic_store_n(&g_lock, 0u, __ATOMIC_RELEASE);
+    __asm__ volatile("sev");
 }
 
 void uart_init() {
