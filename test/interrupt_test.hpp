@@ -18,28 +18,38 @@ class IRQTest : public ::testing::Test
          * @brief Memory region for IRQ instance will be taken from m_memory_region,
          *        the IRQ instance layout will be done from m_memory_region.
         */
-        IRQTest() : m_memory_region(BCM2837::InterruptRegisterAddress::Register::IRQs_ALL_MAX
-                                    + (sizeof(IVT) + sizeof(std::uint32_t) - 1) / sizeof(std::uint32_t)),
+        IRQTest() : m_memory_region(IRQ::region_words()),
                     m_irq(IRQ(m_memory_region.data())) {
-            // The IRQ driver overlays the register block AND places an IVT right
-            // past it (at region + IRQs_ALL_MAX), so the buffer must cover both —
-            // otherwise install_*Handler writes past the end (the bus error).
-            // Zero after the overlay: the register/IVT structs have trivial ctors
-            // (so they don't clobber live MMIO), which lets -O2/-O3 drop the
-            // vector's value-init as a dead store; zeroing here is observed by
-            // the driver's volatile reads and is not elided.
+            // The IRQ driver overlays THREE blocks on one region:
+            // [interrupt registers][IVT (16 AArch64 vectors + dispatch table)]
+            // [ARM-local registers]. IRQ::region_words() sizes the buffer to
+            // cover all three — otherwise install_*Handler / dispatch write past
+            // the end (a bus error). Zero after the overlay: the register/IVT
+            // structs have trivial ctors (so they don't clobber live MMIO), which
+            // lets -O2/-O3 drop the vector's value-init as a dead store; zeroing
+            // here is observed by the driver's volatile reads and is not elided.
             std::memset(m_memory_region.data(), 0,
                         m_memory_region.size() * sizeof(std::uint32_t));
         }
 
         virtual ~IRQTest() override = default;
-        
+
         virtual void SetUp() override;
         virtual void TearDown() override;
         virtual void TestBody() override;
 
+        // All IRQ copies share the overlaid region (references), so registers,
+        // the IVT and the dispatch table are common state across irq() calls.
         IRQ irq() const {
             return(m_irq);
+        }
+
+        /// Raw overlaid buffer, for scripting pending/source bits in dispatch
+        /// tests. The ARM-local block starts at IRQ::kLocalWordOffset words.
+        std::uint32_t* region() { return m_memory_region.data(); }
+        void zero_region() {
+            std::memset(m_memory_region.data(), 0,
+                        m_memory_region.size() * sizeof(std::uint32_t));
         }
 
     private:

@@ -21,6 +21,24 @@
 #define BCM_PERIPH_BASE 0x3F000000U
 #endif
 
+/**
+ * @brief Physical base of the per-core **ARM local peripherals** block (the
+ *        "QA7" register file: per-core timer/mailbox interrupt control + IRQ/FIQ
+ *        source). This is a SEPARATE address space from BCM_PERIPH_BASE — it is
+ *        NOT in the BCM283x peripheral window and does not move with it:
+ *
+ *          0x40000000   // BCM2836/7: Pi 2 / Pi 3 / Pi Zero 2 W   (this default)
+ *          0xFF800000   // BCM2711:   Pi 4 / Pi 400 / CM4
+ *
+ * The block does not exist on BCM2835 (Pi 1 / Zero), which is single-core with
+ * no local interrupt routing. See ARMv8-A on the Pi 3: the AArch64 generic-timer
+ * IRQ (CNTPNSIRQ) and the legacy controller's combined output are both routed to
+ * a core through this block (see inc/interrupt.hpp dispatch()).
+*/
+#ifndef BCM_LOCAL_BASE
+#define BCM_LOCAL_BASE 0x40000000U
+#endif
+
 namespace BCM2837 {
 
     /**
@@ -321,6 +339,85 @@ namespace BCM2837 {
          **/
         device_register m_register[Register::IRQs_ALL_MAX];
 
+    };
+
+    /**
+     * @brief
+     *      Per-core **ARM local peripherals** ("QA7") register block at
+     *      BCM_LOCAL_BASE (0x40000000 on BCM2836/7). This is where the AArch64
+     *      generic-timer interrupts and the legacy interrupt controller's
+     *      combined "GPU IRQ" line are routed to a specific core — the piece the
+     *      classic AArch32 IVT model omitted entirely. Registers are word-indexed
+     *      by their datasheet byte offset / 4 (the repo convention). The four
+     *      per-core variants are contiguous, so register N for core c is
+     *      `CoreN_base + c` (e.g. CORE_IRQ_SOURCE0 + 2 == core 2's IRQ source).
+     *
+     *      Reference: "Quad-A7 control" (BCM2836 ARM-local peripherals) §4.
+    */
+    struct ArmLocalRegisterAddress {
+        enum Register : std::uint32_t {
+            CONTROL              = 0x00 / 4,  /* 0x00: control (timer source etc.) */
+            CORE_TIMER_PRESCALER = 0x08 / 4,  /* 0x08: core timer prescaler        */
+            GPU_INT_ROUTING      = 0x0C / 4,  /* 0x0C: route GPU IRQ/FIQ to a core  */
+            PMU_INT_ROUTING_SET  = 0x10 / 4,  /* 0x10: PMU interrupt routing set     */
+            PMU_INT_ROUTING_CLR  = 0x14 / 4,  /* 0x14: PMU interrupt routing clear   */
+            CORE_TIMER_LS        = 0x1C / 4,  /* 0x1C: 64-bit core timer, low word   */
+            CORE_TIMER_MS        = 0x20 / 4,  /* 0x20: 64-bit core timer, high word  */
+            LOCAL_INT_ROUTING    = 0x24 / 4,  /* 0x24: local timer IRQ/FIQ routing   */
+            LOCAL_TIMER_CONTROL  = 0x34 / 4,  /* 0x34: local timer control & status  */
+            LOCAL_TIMER_WRITE    = 0x38 / 4,  /* 0x38: local timer IRQ clear/reload  */
+            CORE_TIMER_IRQCNTL0  = 0x40 / 4,  /* 0x40..0x4C: per-core timer IRQ ctrl */
+            CORE_MBOX_IRQCNTL0   = 0x50 / 4,  /* 0x50..0x5C: per-core mailbox IRQ ctl*/
+            CORE_IRQ_SOURCE0     = 0x60 / 4,  /* 0x60..0x6C: per-core IRQ source     */
+            CORE_FIQ_SOURCE0     = 0x70 / 4,  /* 0x70..0x7C: per-core FIQ source     */
+            ARM_LOCAL_MAX        = 0x80 / 4   /* one word past CORE_FIQ_SOURCE3      */
+        };
+
+        /**
+         * @brief Bit positions shared by CORE_TIMER_IRQCNTLn (enables) and
+         *        CORE_IRQ_SOURCEn / CORE_FIQ_SOURCEn (pending decode). The low
+         *        nibble is the four generic-timer lines; in CORE_TIMER_IRQCNTLn
+         *        bits 0-3 are the IRQ enables and bits 4-7 the FIQ enables.
+         *        CNTPNSIRQ (bit 1) is the physical non-secure timer an AArch64
+         *        EL1 kernel uses for its tick.
+        */
+        enum Source : std::uint32_t {
+            CNTPSIRQ  = 0,   /* physical secure timer        */
+            CNTPNSIRQ = 1,   /* physical non-secure timer    */
+            CNTHPIRQ  = 2,   /* hypervisor (EL2) timer       */
+            CNTVIRQ   = 3,   /* virtual timer                */
+            MAILBOX0  = 4,
+            MAILBOX1  = 5,
+            MAILBOX2  = 6,
+            MAILBOX3  = 7,
+            GPU       = 8,   /* combined legacy-controller output (one core only) */
+            PMU       = 9,
+            AXI_QUIET = 10,  /* core 0 only                   */
+            LOCALTIMER = 11
+        };
+
+        using device_register = mmio_reg;
+        ArmLocalRegisterAddress() {}
+        ~ArmLocalRegisterAddress() {}
+
+        /**
+         * @brief Placement-new seam: overlay on the live QA7 block at
+         *        BCM_LOCAL_BASE on hardware, or on a caller-supplied buffer in
+         *        tests. Mirrors InterruptRegisterAddress::operator new.
+        */
+        void *operator new(std::size_t nBytes, void *region=nullptr) {
+            (void)nBytes;
+            if(nullptr == region) {
+                return reinterpret_cast<void *>(BCM_LOCAL_BASE);
+            }
+            return(region);
+        }
+
+        device_register* operator[](Register offset) {
+            return(&m_register[offset]);
+        }
+
+        device_register m_register[Register::ARM_LOCAL_MAX];
     };
 
     /**
