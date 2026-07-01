@@ -14,7 +14,9 @@ namespace {
 void set_active_irq(IRQ* irq) { g_active = irq; }
 
 extern "C" void irq_handler_c() {
-    if(g_active) g_active->dispatch(0);
+    // Dispatch for the core that actually took the IRQ: each core has its own
+    // CORE_IRQ_SOURCE / generic timer, so dispatch(core) reads the right one.
+    if(g_active) g_active->dispatch(core_id());
 }
 
 extern "C" void bad_exception_c(unsigned long kind,

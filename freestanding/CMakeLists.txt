@@ -12,7 +12,10 @@ set(REPO ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 # Bare-metal codegen: no libc/startup, no exceptions/RTTI, integer regs only
 # (exception stubs don't save FP/SIMD), fixed-address (non-PIC) image.
-set(FS_COMMON "-ffreestanding -fno-pic -mgeneral-regs-only -mcpu=cortex-a53 -Wall -Wextra")
+# -mno-outline-atomics: inline the ldaxr/stxr for __atomic_* (the console
+# spinlock) instead of calling libgcc's __aarch64_*_acq helpers, which aren't
+# linked into this freestanding image.
+set(FS_COMMON "-ffreestanding -fno-pic -mgeneral-regs-only -mno-outline-atomics -mcpu=cortex-a53 -Wall -Wextra")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${FS_COMMON}")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mcpu=cortex-a53")
 # INTERRUPT_BAREMETAL makes IRQ::install_vector_table emit `msr VBAR_EL1`.
@@ -23,6 +26,8 @@ add_executable(kernel8.elf
     vectors.S
     kmain.cpp
     exceptions.cpp
+    mmu.cpp
+    smp.cpp
     uart.cpp
     libc_min.cpp
     ${REPO}/src/interrupt/interrupt.cpp          # the modelled IRQ/dispatch code
