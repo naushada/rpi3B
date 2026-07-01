@@ -291,34 +291,45 @@ The register/field logic is verified on the host (gtest over heap buffers) and
 the same code drives real silicon via the `mmap` path above. The `IRQ`/IVT layer
 is an **AArch64-correct model** (`VBAR_EL1` 16-slot vector table + a top-level IRQ
 dispatcher over the legacy controller and the per-core ARM local block),
-host-tested over a buffer **and** exercised by a real freestanding image (see the
-next section). Driving real pins also needs the usual pin-mux (ALT0) +
-clock-divider setup, not just the register writes.
+host-tested over a buffer **and** exercised by a real freestanding image that
+enables the MMU and runs the dispatcher on **all four cores** (see the next
+section). Driving real pins also needs the usual pin-mux (ALT0) + clock-divider
+setup, not just the register writes.
 
 ### Bare-metal runtime (`freestanding/`)
 
-A small freestanding aarch64 image makes the interrupt model real: it drops to
-EL1, installs the 16-entry vector table into `VBAR_EL1`, wires the ARM generic
-timer, and takes `CNTPNSIRQ` through `IRQ::dispatch()` to a handler that prints
-tick counts over the UART. It is **verified booting in QEMU `raspi3b`** via a
-containerised aarch64 cross toolchain — no host setup required:
+A small freestanding aarch64 image makes the interrupt model real and brings up
+**all four BCM2837 cores**. Core 0 drops to EL1, enables the **MMU** (identity
+map: RAM Normal cacheable **inner-shareable**, peripherals + ARM-local Device),
+installs the 16-entry vector table into `VBAR_EL1`, then **releases cores 1..3**
+via the Pi 3 spin-table. Every core enables the MMU, sets its own `VBAR_EL1`,
+arms its own ARM generic timer, and takes `CNTPNSIRQ` through
+`IRQ::dispatch(core)` to a shared handler that prints per-core tick counts over
+the UART (serialised by a cross-core console lock). It is **verified booting in
+QEMU `raspi3b`** via a containerised aarch64 cross toolchain — no host setup
+required:
 
 ```bash
 podman build -t bcm2837-bm-builder -f freestanding/Dockerfile freestanding
 podman run --rm -v "$PWD":/src:Z -w /src bcm2837-bm-builder freestanding/build-and-run.sh
-#   running at EL1
+#   core 0 running at EL1
+#   MMU enabled (RAM cacheable inner-shareable, MMIO device)
 #   VBAR_EL1 -> vector_table @ 0x0000000000080800
-#   [irq] timer tick #1
-#   [irq] timer tick #2  ...
+#   [core 0] online
+#   [core 1] online   [core 2] online   [core 3] online
+#   [core 0] timer tick #1   [core 1] timer tick #1  ...
 ```
 
-`freestanding/` holds the boot + EL2→EL1 drop (`boot.S`), the vector table +
-context save/restore (`vectors.S`), a minimal PL011 console + `printf`, and the
-`kmain` demo; `interrupt.cpp` is compiled `-DINTERRUPT_BAREMETAL` so
-`IRQ::install_vector_table` emits `msr VBAR_EL1`. Design + layout:
-[`docs/aarch64-interrupt-model.md`](docs/aarch64-interrupt-model.md). The image
-also builds as a `kernel8.img` for a real Pi 3 (`arm_64bit=1`). MMU/caches and
-SMP are intentionally out of scope for this demo.
+`freestanding/` holds the boot + EL2→EL1 drop + per-core stacks (`boot.S`), the
+vector table + context save/restore (`vectors.S`), the MMU bring-up (`mmu.cpp`),
+the SMP release + per-core timer demo (`smp.cpp`), a minimal PL011 console +
+`printf`, and the `kmain` (core 0) entry; `interrupt.cpp` is compiled
+`-DINTERRUPT_BAREMETAL` so `IRQ::install_vector_table` emits `msr VBAR_EL1`.
+Design + layout: [`docs/aarch64-interrupt-model.md`](docs/aarch64-interrupt-model.md).
+The image also builds as a `kernel8.img` for a real Pi 3 (`arm_64bit=1`). The
+**inner-shareable Normal** memory attribute is what makes the four cores'
+caches coherent — the prerequisite for SMP; Device memory keeps MMIO
+strongly-ordered.
 
 ## Use in the iot Yocto image
 
