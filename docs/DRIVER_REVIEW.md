@@ -88,12 +88,18 @@ bug / inconsistency · **[L]** cosmetic / warning.
   CMake refactor: a `bcm2837_driver` STATIC library globs `src/*/*.cpp`, builds as
   C++20, and the public headers are kept C++17-consumable (explicit-template
   ctors) so the C++17 `iot` build can link it.
-- **[H] No freestanding/cross toolchain.** The project compiles as a normal host
-  program (`-pg`, default sysroot). There is no `aarch64-none-elf` toolchain
-  file, no linker script, no startup/`_start`, so the artifact is **not loadable
-  on the Pi**. The `operator new` returning `0x3F200000` would segfault if ever
-  dereferenced on the host. Today the framework is effectively a host-side
-  bit-layout simulator.
+- **[H] No freestanding/cross toolchain.** ✅ **RESOLVED for the interrupt/IVT
+  path.** The *driver* library still compiles as a normal host program (the
+  `operator new` returning `0x3F200000` would segfault if dereferenced on the
+  host — it is a host-side bit-layout model). But a real bare-metal runtime now
+  exists under [`freestanding/`](../freestanding): an `aarch64-linux-gnu` cross
+  toolchain file, a linker script, and a `_start` (`boot.S`) that produce a
+  loadable `kernel8.img`. It **enables the MMU** (identity map, RAM Normal
+  cacheable inner-shareable, MMIO Device) and brings up **all four cores** (SMP,
+  spin-table release), each taking its own generic-timer IRQ through
+  `IRQ::dispatch(core)` — **verified booting in QEMU `raspi3b`**. See
+  [`aarch64-interrupt-model.md`](aarch64-interrupt-model.md). The rest of the
+  peripheral drivers (GPIO/Clock/I2C/SPI) are not yet exercised from that image.
 - **[M] `volatile std::atomic<uint32_t>` for MMIO.** ✅ **FIXED.** `std::atomic`
   added no value over the peripheral bus, and—worse for the real-hardware
   path—C++20's `std::atomic` default constructor value-initialises to 0, so
@@ -205,7 +211,10 @@ bug / inconsistency · **[L]** cosmetic / warning.
 > the legacy controller + the per-core ARM local block (`0x40000000`).
 > `install_IRQHandler`'s previously-ignored IRQ number now keys that dispatch
 > table. See [`aarch64-interrupt-model.md`](aarch64-interrupt-model.md). The
-> freestanding asm vectors + EL2→EL1 drop remain a documented later phase.
+> freestanding asm vectors + EL2→EL1 drop are now **implemented** (`boot.S` /
+> `vectors.S`), and the image goes further — enabling the MMU and running the
+> dispatcher on **all four cores** (`dispatch(core_id())`), verified in QEMU
+> `raspi3b`.
 
 - **[H] enable/disable register selection inverted and out of range.**
   ```cpp
