@@ -77,7 +77,7 @@ so one binary runs on every board below:
 | I²C1 (BSC1) | SDA1 = GPIO2, SCL1 = GPIO3 | mux to ALT0 + set clock divider |
 | SPI0       | GPIO7–GPIO11 (CE1/CE0/MISO/MOSI/SCLK) | mux to ALT0 + set clock divider |
 | Clock mgr  | (internal) | GP clock generators |
-| Interrupt  | (internal) | bare-metal IVT only |
+| Interrupt  | (internal) | AArch64 `VBAR_EL1` IVT + IRQ dispatch (bare-metal) |
 
 **To run on real hardware you also need:**
 
@@ -171,7 +171,7 @@ A [`Dockerfile`](Dockerfile) builds the library, demo, and gtest suite in a
 pinned Debian image and runs the suite at build time (fatal by default):
 
 ```bash
-podman build -t bcm2837:latest .                 # builds + runs the 94-case suite
+podman build -t bcm2837:latest .                 # builds + runs the 97-case suite
 podman run --rm bcm2837:latest                   # demo usage
 podman run --rm --entrypoint bcm2837_test bcm2837:latest   # run the suite
 ```
@@ -281,17 +281,21 @@ A *bare-metal* build instead selects the base at compile time with
 This is safe because `BCM2837::mmio_reg` (the register cell type) is *trivially
 default-constructible*: placement-new'ing a register block over live MMIO
 **overlays** the registers instead of zeroing them. `IRQ` is **not** exposed
-here — its IVT/exception-vector model is bare-metal-only, not a Linux userspace
-concept.
+here — its AArch64 `VBAR_EL1` vector/exception model is bare-metal-only, not a
+Linux userspace concept (see [`docs/aarch64-interrupt-model.md`](docs/aarch64-interrupt-model.md)).
 
 ## Status
 
 The register/field logic is verified on the host (gtest over heap buffers) and
 the same code drives real silicon via the `mmap` path above. What's still
 bare-metal-only: there is no freestanding/cross toolchain, linker script, or
-`_start`, and the `IRQ`/IVT layer assumes a kernel context. Driving real pins
-also needs the usual pin-mux (ALT0) + clock-divider setup, not just the register
-writes.
+`_start`. The `IRQ`/IVT layer is an **AArch64-correct model** (`VBAR_EL1` 16-slot
+vector table + a top-level IRQ dispatcher over the legacy controller and the
+per-core ARM local block), host-tested over a buffer; the freestanding asm
+vectors + EL2→EL1 drop that wire it to real silicon are a documented later phase
+(see [`docs/aarch64-interrupt-model.md`](docs/aarch64-interrupt-model.md)).
+Driving real pins also needs the usual pin-mux (ALT0) + clock-divider setup, not
+just the register writes.
 
 ## Use in the iot Yocto image
 
@@ -308,6 +312,7 @@ In-repo design and reference docs under [`docs/`](docs/):
 | Doc | What it covers |
 |-----|----------------|
 | [`docs/DRIVER_REVIEW.md`](docs/DRIVER_REVIEW.md) | Per-peripheral design review and the open/fixed issue log. |
+| [`docs/aarch64-interrupt-model.md`](docs/aarch64-interrupt-model.md) | AArch64 `VBAR_EL1` vector-table + IRQ-dispatch model (legacy controller + per-core ARM local block); what's modeled vs. the deferred freestanding runtime. |
 | [`docs/i2c-irq-transport-spec.md`](docs/i2c-irq-transport-spec.md) | Spec for the interrupt-driven I²C transport (`Bcm2837I2cIrqTransport`). |
 | [`docs/HARDWARE_PROPOSAL.md`](docs/HARDWARE_PROPOSAL.md) | Proposal for a minimal battery-powered IoT gateway + WiFi AP running `device-iot`. |
 

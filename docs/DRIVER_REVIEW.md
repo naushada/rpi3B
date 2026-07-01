@@ -192,13 +192,20 @@ bug / inconsistency · **[L]** cosmetic / warning.
   parentheses`) in the three `CM_GPnCTL` `ALL` cases; behaviour is intended but
   the `auto all_value = 0;` makes it `int`.
 
-### 2.4 Interrupt (`src/interrupt/interrupt.cpp`) — ✅ FIXED (handler/enable logic)
+### 2.4 Interrupt (`src/interrupt/interrupt.cpp`) — ✅ FIXED (handler/enable logic) + reworked to AArch64
 > Resolved: `enable`/`disable` now select bank 1 for IRQ 0–31 and bank 2 (shift
 > `n-32`) for 32–63; `isEnabled` reads back the Enable register without
 > side-effects and with correct `&`/`==` precedence; `install_IRQHandler`/
-> `install_FIQHandler` assign the IVT slot directly instead of dereferencing a
-> wild pointer. Regression tests added in `test/interrupt_test.cpp`. The IVT
-> placement note below (`[M]`) is a design observation left as-is.
+> `install_FIQHandler` no longer dereference a wild pointer. Regression tests in
+> `test/interrupt_test.cpp`.
+>
+> The `[M]` IVT-placement note below is now **resolved**: the vector model was
+> reworked from the (wrong) AArch32 8-vector layout to the **AArch64 `VBAR_EL1`**
+> 16-entry × `0x80` table, and a real top-level **IRQ dispatcher** was added over
+> the legacy controller + the per-core ARM local block (`0x40000000`).
+> `install_IRQHandler`'s previously-ignored IRQ number now keys that dispatch
+> table. See [`aarch64-interrupt-model.md`](aarch64-interrupt-model.md). The
+> freestanding asm vectors + EL2→EL1 drop remain a documented later phase.
 
 - **[H] enable/disable register selection inverted and out of range.**
   ```cpp
@@ -218,10 +225,12 @@ bug / inconsistency · **[L]** cosmetic / warning.
   *function pointer slot value* (initially garbage/null) to an `IVT*` and
   dereferences it. It also ignores the `IRQNumber` argument. It should simply do
   `m_ivt[IVT::Number::IRQ] = cb;`. Same in `install_FIQHandler`.
-- **[M] IVT placement is inconsistent / unrealistic.** The default ctor places
-  the IVT at `0x00000000`; the region ctor places it right after the IRQ
-  registers. On ARM the exception vectors live at the VBAR-relative base, not
-  adjacent to peripheral MMIO.
+- **[M] IVT placement is inconsistent / unrealistic.** ✅ **RESOLVED.** The old
+  model was AArch32 (8 vectors at `0x00..0x1C`) and placed the table adjacent to
+  MMIO. The rework models the AArch64 reality: the table lives at a 2 KB-aligned
+  `VBAR_EL1` base (set via `install_vector_table()`), and the region ctor's
+  buffer placement is now explicitly a *host-test overlay*, not a claim about
+  hardware addresses. See [`aarch64-interrupt-model.md`](aarch64-interrupt-model.md).
 
 ---
 
